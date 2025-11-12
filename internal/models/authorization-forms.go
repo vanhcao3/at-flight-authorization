@@ -44,10 +44,10 @@ type Dimension struct {
 
 // 2. Giay chung nhan dang ky
 type DroneRegistration struct {
-	DroneType          string    `json:"drone_type" gorm:"not null"`
-	FactoryNumber      string    `json:"factory_number" gorm:"not null"`
-	RegistrationNumber string    `json:"registration_number" gorm:"not null"`
-	RegistrationDate   time.Time `json:"registration_date" gorm:"type:date;not null"`
+	DroneType          string `json:"drone_type" gorm:"not null"`
+	FactoryNumber      string `json:"factory_number" gorm:"not null"`
+	RegistrationNumber string `json:"registration_number" gorm:"not null"`
+	RegistrationDate   Date   `json:"registration_date" gorm:"type:date;not null"`
 }
 
 // 3. Thong so ky thuat cua phuong tien bay
@@ -93,15 +93,15 @@ type OperatingDuration struct {
 
 // 8. Thong tin nguoi dieu khien phuong tien bay
 type PilotLicense struct {
-	LicenseNumber        string    `json:"license_number" gorm:"not null"`
-	LicenseProvisionDate time.Time `json:"license_provision_date" gorm:"type:date;not null"`
+	LicenseNumber        string `json:"license_number" gorm:"not null"`
+	LicenseProvisionDate Date   `json:"license_provision_date" gorm:"type:date;not null"`
 }
 
 type Pilot struct {
 	ID                            uuid.UUID    `json:"id" gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	FlightAuthorizationProposalID uuid.UUID    `json:"flight_authorization_proposal_id" gorm:"type:uuid;index"`
 	Name                          string       `json:"name" gorm:"not null"`
-	Birthday                      time.Time    `json:"birthday" gorm:"type:date;not null"`
+	Birthday                      Date         `json:"birthday" gorm:"type:date;not null"`
 	IdentificationNumber          string       `json:"identification_number" gorm:"not null"`
 	PhoneNumber                   string       `json:"phone_number" gorm:"not null"`
 	PilotLicense                  PilotLicense `json:"pilot_license" gorm:"embedded"`

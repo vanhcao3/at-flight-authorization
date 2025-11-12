@@ -3,17 +3,21 @@ package handlers
 import (
 	"172.21.5.249/airtrans/at-flight-authorization/internal/hapi"
 	"172.21.5.249/airtrans/at-flight-authorization/internal/hapi/handlers/common"
+	"172.21.5.249/airtrans/at-flight-authorization/internal/hapi/handlers/flightauthorizationapproval"
+	"172.21.5.249/airtrans/at-flight-authorization/internal/hapi/handlers/flightauthorizationproposal"
+	"172.21.5.249/airtrans/at-flight-authorization/internal/hapi/handlers/flightnotification"
 
 	"github.com/labstack/echo/v4"
 )
 
 func AttackAllRoutes(s *hapi.Server) {
-	s.Router.Routes = []*echo.Route{
-		// GET /-/version
+	routes := []*echo.Route{
 		common.GetVersionRoute(s),
-		// GET /-/ready
 		common.GetReadyRoute(s),
-		// GET /-/healthy
 		common.GetHealthyRoute(s),
 	}
+	routes = append(routes, flightauthorizationproposal.RegisterRoutes(s)...)
+	routes = append(routes, flightauthorizationapproval.RegisterRoutes(s)...)
+	routes = append(routes, flightnotification.RegisterRoutes(s)...)
+	s.Router.Routes = routes
 }

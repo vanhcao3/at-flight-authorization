@@ -25,6 +25,17 @@ func RegisterRoutes(s *hapi.Server) []*echo.Route {
 	}
 }
 
+// CreateFlightNotification godoc
+// @Summary Create flight notification
+// @Description Create a new flight notification associated with an approval
+// @Tags flight-notifications
+// @Accept json
+// @Produce json
+// @Param request body models.FlightNotification true "Flight notification payload"
+// @Success 201 {object} models.FlightNotification
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
+// @Router /flight-notifications [post]
 func createHandler(s *hapi.Server) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		payload := new(models.FlightNotification)
@@ -46,6 +57,17 @@ func createHandler(s *hapi.Server) echo.HandlerFunc {
 	}
 }
 
+// GetFlightNotification godoc
+// @Summary Get flight notification
+// @Description Retrieve a flight notification by ID
+// @Tags flight-notifications
+// @Produce json
+// @Param id path string true "Flight notification ID"
+// @Success 200 {object} models.FlightNotification
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 404 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
+// @Router /flight-notifications/{id} [get]
 func getHandler(s *hapi.Server) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("id"))
@@ -73,6 +95,18 @@ func getHandler(s *hapi.Server) echo.HandlerFunc {
 	}
 }
 
+// ListFlightNotifications godoc
+// @Summary List flight notifications
+// @Description List flight notifications filtered by query parameters
+// @Tags flight-notifications
+// @Produce json
+// @Param page query int false "Page number (starting from 1)"
+// @Param size query int false "Page size"
+// @Param flight_authorization_approval_id query string false "Filter by approval ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
+// @Router /flight-notifications [get]
 func listHandler(s *hapi.Server) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		page := 1
@@ -126,6 +160,19 @@ func listHandler(s *hapi.Server) echo.HandlerFunc {
 	}
 }
 
+// UpdateFlightNotification godoc
+// @Summary Update flight notification
+// @Description Update a flight notification and its intended flight areas
+// @Tags flight-notifications
+// @Accept json
+// @Produce json
+// @Param id path string true "Flight notification ID"
+// @Param request body models.FlightNotification true "Flight notification payload"
+// @Success 200 {object} models.FlightNotification
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 404 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
+// @Router /flight-notifications/{id} [put]
 func updateHandler(s *hapi.Server) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("id"))
@@ -160,6 +207,17 @@ func updateHandler(s *hapi.Server) echo.HandlerFunc {
 	}
 }
 
+// DeleteFlightNotification godoc
+// @Summary Delete flight notification
+// @Description Delete a flight notification by ID
+// @Tags flight-notifications
+// @Produce json
+// @Param id path string true "Flight notification ID"
+// @Success 200 {object} types.SucceedResponse
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 404 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
+// @Router /flight-notifications/{id} [delete]
 func deleteHandler(s *hapi.Server) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("id"))

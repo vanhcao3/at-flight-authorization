@@ -25,6 +25,17 @@ func RegisterRoutes(s *hapi.Server) []*echo.Route {
 	}
 }
 
+// CreateFlightAuthorizationApproval godoc
+// @Summary Create flight authorization approval
+// @Description Create a new flight authorization approval with associated areas and parameters
+// @Tags flight-authorization-approvals
+// @Accept json
+// @Produce json
+// @Param request body models.FlightAuthorizationApproval true "Flight authorization approval payload"
+// @Success 201 {object} models.FlightAuthorizationApproval
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
+// @Router /flight-authorization-approvals [post]
 func createHandler(s *hapi.Server) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		payload := new(models.FlightAuthorizationApproval)
@@ -46,6 +57,17 @@ func createHandler(s *hapi.Server) echo.HandlerFunc {
 	}
 }
 
+// GetFlightAuthorizationApproval godoc
+// @Summary Get flight authorization approval
+// @Description Retrieve a flight authorization approval by ID
+// @Tags flight-authorization-approvals
+// @Produce json
+// @Param id path string true "Flight authorization approval ID"
+// @Success 200 {object} models.FlightAuthorizationApproval
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 404 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
+// @Router /flight-authorization-approvals/{id} [get]
 func getHandler(s *hapi.Server) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("id"))
@@ -73,6 +95,18 @@ func getHandler(s *hapi.Server) echo.HandlerFunc {
 	}
 }
 
+// ListFlightAuthorizationApprovals godoc
+// @Summary List flight authorization approvals
+// @Description List flight authorization approvals filtered by query parameters
+// @Tags flight-authorization-approvals
+// @Produce json
+// @Param page query int false "Page number (starting from 1)"
+// @Param size query int false "Page size"
+// @Param flight_authorization_proposal_id query string false "Filter by proposal ID"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
+// @Router /flight-authorization-approvals [get]
 func listHandler(s *hapi.Server) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		page := 1
@@ -126,6 +160,19 @@ func listHandler(s *hapi.Server) echo.HandlerFunc {
 	}
 }
 
+// UpdateFlightAuthorizationApproval godoc
+// @Summary Update flight authorization approval
+// @Description Update a flight authorization approval and its related resources
+// @Tags flight-authorization-approvals
+// @Accept json
+// @Produce json
+// @Param id path string true "Flight authorization approval ID"
+// @Param request body models.FlightAuthorizationApproval true "Flight authorization approval payload"
+// @Success 200 {object} models.FlightAuthorizationApproval
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 404 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
+// @Router /flight-authorization-approvals/{id} [put]
 func updateHandler(s *hapi.Server) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("id"))
@@ -160,6 +207,17 @@ func updateHandler(s *hapi.Server) echo.HandlerFunc {
 	}
 }
 
+// DeleteFlightAuthorizationApproval godoc
+// @Summary Delete flight authorization approval
+// @Description Delete a flight authorization approval by ID
+// @Tags flight-authorization-approvals
+// @Produce json
+// @Param id path string true "Flight authorization approval ID"
+// @Success 200 {object} types.SucceedResponse
+// @Failure 400 {object} types.ErrorResponse
+// @Failure 404 {object} types.ErrorResponse
+// @Failure 500 {object} types.ErrorResponse
+// @Router /flight-authorization-approvals/{id} [delete]
 func deleteHandler(s *hapi.Server) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := uuid.Parse(c.Param("id"))

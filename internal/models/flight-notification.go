@@ -22,6 +22,7 @@ type IntendedFlightArea struct {
 
 type FlightNotification struct {
 	ID                            uuid.UUID                   `json:"id" gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	Name                          string                      `json:"name" gorm:"not null"`
 	FlightAuthorizationApprovalID uuid.UUID                   `json:"flight_authorization_approval_id" gorm:"type:uuid;index"`
 	FlightAuthorizationApproval   FlightAuthorizationApproval `json:"flight_authorization_approval" gorm:"foreignKey:FlightAuthorizationApprovalID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	IntendedOperatingDuration     OperatingDuration           `json:"intended_operating_duration" gorm:"embedded"`

@@ -39,10 +39,92 @@ func notificationPreload(tx *gorm.DB) *gorm.DB {
 		})
 }
 
+func prepareProposalForCreate(payload *models.FlightAuthorizationProposal) {
+	if payload == nil {
+		return
+	}
+	if payload.ID == uuid.Nil {
+		payload.ID = uuid.New()
+	}
+	if payload.Operator.ID == uuid.Nil {
+		payload.Operator.ID = uuid.New()
+	}
+	payload.Operator.FlightAuthorizationProposalID = payload.ID
+	for i := range payload.Drones {
+		if payload.Drones[i].ID == uuid.Nil {
+			payload.Drones[i].ID = uuid.New()
+		}
+		payload.Drones[i].FlightAuthorizationProposalID = payload.ID
+	}
+	for i := range payload.FlightArea {
+		if payload.FlightArea[i].ID == uuid.Nil {
+			payload.FlightArea[i].ID = uuid.New()
+		}
+		payload.FlightArea[i].FlightAuthorizationProposalID = payload.ID
+		for j := range payload.FlightArea[i].Polygon {
+			if payload.FlightArea[i].Polygon[j].ID == uuid.Nil {
+				payload.FlightArea[i].Polygon[j].ID = uuid.New()
+			}
+			payload.FlightArea[i].Polygon[j].FlightAreaID = payload.FlightArea[i].ID
+		}
+	}
+	if payload.Pilot.ID == uuid.Nil {
+		payload.Pilot.ID = uuid.New()
+	}
+	payload.Pilot.FlightAuthorizationProposalID = payload.ID
+}
+
+func prepareApprovalForCreate(payload *models.FlightAuthorizationApproval) {
+	if payload == nil {
+		return
+	}
+	if payload.ID == uuid.Nil {
+		payload.ID = uuid.New()
+	}
+	for i := range payload.AuthorizedFlightArea {
+		if payload.AuthorizedFlightArea[i].ID == uuid.Nil {
+			payload.AuthorizedFlightArea[i].ID = uuid.New()
+		}
+		payload.AuthorizedFlightArea[i].FlightAuthorizationApprovalID = payload.ID
+		for j := range payload.AuthorizedFlightArea[i].Polygon {
+			if payload.AuthorizedFlightArea[i].Polygon[j].ID == uuid.Nil {
+				payload.AuthorizedFlightArea[i].Polygon[j].ID = uuid.New()
+			}
+			payload.AuthorizedFlightArea[i].Polygon[j].AuthorizedFlightAreaID = payload.AuthorizedFlightArea[i].ID
+		}
+	}
+	if payload.FlightParameter.ID == uuid.Nil {
+		payload.FlightParameter.ID = uuid.New()
+	}
+	payload.FlightParameter.FlightAuthorizationApprovalID = payload.ID
+}
+
+func prepareNotificationForCreate(payload *models.FlightNotification) {
+	if payload == nil {
+		return
+	}
+	if payload.ID == uuid.Nil {
+		payload.ID = uuid.New()
+	}
+	for i := range payload.IntendedFlightArea {
+		if payload.IntendedFlightArea[i].ID == uuid.Nil {
+			payload.IntendedFlightArea[i].ID = uuid.New()
+		}
+		payload.IntendedFlightArea[i].FlightNotificationID = payload.ID
+		for j := range payload.IntendedFlightArea[i].Polygon {
+			if payload.IntendedFlightArea[i].Polygon[j].ID == uuid.Nil {
+				payload.IntendedFlightArea[i].Polygon[j].ID = uuid.New()
+			}
+			payload.IntendedFlightArea[i].Polygon[j].IntendedFlightAreaID = payload.IntendedFlightArea[i].ID
+		}
+	}
+}
+
 func (s *Service) CreateFlightAuthorizationProposal(ctx context.Context, payload *models.FlightAuthorizationProposal) (*models.FlightAuthorizationProposal, error) {
 	if payload == nil {
 		return nil, errors.New("payload is nil")
 	}
+	prepareProposalForCreate(payload)
 	payload.Status = models.ProposalStatusPending
 	err := s.db.WithContext(ctx).Session(&gorm.Session{FullSaveAssociations: true}).Create(payload).Error
 	if err != nil {
@@ -134,6 +216,7 @@ func (s *Service) UpdateFlightAuthorizationProposal(ctx context.Context, id uuid
 			return err
 		}
 		updates := map[string]interface{}{
+			"name":           payload.Name,
 			"flight_purpose": payload.FlightPurpose,
 			"airport":        payload.Airport,
 			"duration":       payload.OperatingDuration.Duration,
@@ -146,6 +229,7 @@ func (s *Service) UpdateFlightAuthorizationProposal(ctx context.Context, id uuid
 		if err := tx.Where("flight_authorization_proposal_id = ?", id).Delete(&models.Operator{}).Error; err != nil {
 			return err
 		}
+		payload.Operator.ID = uuid.New()
 		payload.Operator.FlightAuthorizationProposalID = id
 		if err := tx.Create(&payload.Operator).Error; err != nil {
 			return err
@@ -154,6 +238,9 @@ func (s *Service) UpdateFlightAuthorizationProposal(ctx context.Context, id uuid
 			return err
 		}
 		for i := range payload.Drones {
+			if payload.Drones[i].ID == uuid.Nil {
+				payload.Drones[i].ID = uuid.New()
+			}
 			payload.Drones[i].FlightAuthorizationProposalID = id
 		}
 		if len(payload.Drones) > 0 {
@@ -165,7 +252,16 @@ func (s *Service) UpdateFlightAuthorizationProposal(ctx context.Context, id uuid
 			return err
 		}
 		for i := range payload.FlightArea {
+			if payload.FlightArea[i].ID == uuid.Nil {
+				payload.FlightArea[i].ID = uuid.New()
+			}
 			payload.FlightArea[i].FlightAuthorizationProposalID = id
+			for j := range payload.FlightArea[i].Polygon {
+				if payload.FlightArea[i].Polygon[j].ID == uuid.Nil {
+					payload.FlightArea[i].Polygon[j].ID = uuid.New()
+				}
+				payload.FlightArea[i].Polygon[j].FlightAreaID = payload.FlightArea[i].ID
+			}
 		}
 		if len(payload.FlightArea) > 0 {
 			if err := tx.Session(&gorm.Session{FullSaveAssociations: true}).Create(&payload.FlightArea).Error; err != nil {
@@ -175,6 +271,7 @@ func (s *Service) UpdateFlightAuthorizationProposal(ctx context.Context, id uuid
 		if err := tx.Where("flight_authorization_proposal_id = ?", id).Delete(&models.Pilot{}).Error; err != nil {
 			return err
 		}
+		payload.Pilot.ID = uuid.New()
 		payload.Pilot.FlightAuthorizationProposalID = id
 		if err := tx.Create(&payload.Pilot).Error; err != nil {
 			return err
@@ -202,6 +299,7 @@ func (s *Service) CreateFlightAuthorizationApproval(ctx context.Context, payload
 	if payload == nil {
 		return nil, errors.New("payload is nil")
 	}
+	prepareApprovalForCreate(payload)
 	var out models.FlightAuthorizationApproval
 	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Session(&gorm.Session{FullSaveAssociations: true}).Create(payload).Error; err != nil {
@@ -296,6 +394,7 @@ func (s *Service) UpdateFlightAuthorizationApproval(ctx context.Context, id uuid
 		}
 		oldProposalID := existing.FlightAuthorizationProposalID
 		updates := map[string]interface{}{
+			"name":                             payload.Name,
 			"flight_authorization_proposal_id": payload.FlightAuthorizationProposalID,
 			"flight_negotiation_authorities":   payload.FlightNegotiationAuthorities,
 			"duration":                         payload.AuthorizedOperatingDuration.Duration,
@@ -309,7 +408,16 @@ func (s *Service) UpdateFlightAuthorizationApproval(ctx context.Context, id uuid
 			return err
 		}
 		for i := range payload.AuthorizedFlightArea {
+			if payload.AuthorizedFlightArea[i].ID == uuid.Nil {
+				payload.AuthorizedFlightArea[i].ID = uuid.New()
+			}
 			payload.AuthorizedFlightArea[i].FlightAuthorizationApprovalID = id
+			for j := range payload.AuthorizedFlightArea[i].Polygon {
+				if payload.AuthorizedFlightArea[i].Polygon[j].ID == uuid.Nil {
+					payload.AuthorizedFlightArea[i].Polygon[j].ID = uuid.New()
+				}
+				payload.AuthorizedFlightArea[i].Polygon[j].AuthorizedFlightAreaID = payload.AuthorizedFlightArea[i].ID
+			}
 		}
 		if len(payload.AuthorizedFlightArea) > 0 {
 			if err := tx.Session(&gorm.Session{FullSaveAssociations: true}).Create(&payload.AuthorizedFlightArea).Error; err != nil {
@@ -318,6 +426,9 @@ func (s *Service) UpdateFlightAuthorizationApproval(ctx context.Context, id uuid
 		}
 		if err := tx.Where("flight_authorization_approval_id = ?", id).Delete(&models.FlightParameter{}).Error; err != nil {
 			return err
+		}
+		if payload.FlightParameter.ID == uuid.Nil {
+			payload.FlightParameter.ID = uuid.New()
 		}
 		payload.FlightParameter.FlightAuthorizationApprovalID = id
 		if err := tx.Create(&payload.FlightParameter).Error; err != nil {
@@ -359,6 +470,7 @@ func (s *Service) CreateFlightNotification(ctx context.Context, payload *models.
 	if payload == nil {
 		return nil, errors.New("payload is nil")
 	}
+	prepareNotificationForCreate(payload)
 	var out models.FlightNotification
 	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		if err := tx.Session(&gorm.Session{FullSaveAssociations: true}).Create(payload).Error; err != nil {
@@ -453,6 +565,7 @@ func (s *Service) UpdateFlightNotification(ctx context.Context, id uuid.UUID, pa
 			return err
 		}
 		updates := map[string]interface{}{
+			"name":                             payload.Name,
 			"flight_authorization_approval_id": payload.FlightAuthorizationApprovalID,
 			"duration":                         payload.IntendedOperatingDuration.Duration,
 			"from_day":                         payload.IntendedOperatingDuration.FromDay,
@@ -465,7 +578,16 @@ func (s *Service) UpdateFlightNotification(ctx context.Context, id uuid.UUID, pa
 			return err
 		}
 		for i := range payload.IntendedFlightArea {
+			if payload.IntendedFlightArea[i].ID == uuid.Nil {
+				payload.IntendedFlightArea[i].ID = uuid.New()
+			}
 			payload.IntendedFlightArea[i].FlightNotificationID = id
+			for j := range payload.IntendedFlightArea[i].Polygon {
+				if payload.IntendedFlightArea[i].Polygon[j].ID == uuid.Nil {
+					payload.IntendedFlightArea[i].Polygon[j].ID = uuid.New()
+				}
+				payload.IntendedFlightArea[i].Polygon[j].IntendedFlightAreaID = payload.IntendedFlightArea[i].ID
+			}
 		}
 		if len(payload.IntendedFlightArea) > 0 {
 			if err := tx.Session(&gorm.Session{FullSaveAssociations: true}).Create(&payload.IntendedFlightArea).Error; err != nil {

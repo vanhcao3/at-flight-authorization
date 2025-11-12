@@ -119,6 +119,7 @@ const (
 
 type FlightAuthorizationProposal struct {
 	ID                uuid.UUID                         `json:"id" gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	Name              string                            `json:"name" gorm:"not null"`
 	Operator          Operator                          `json:"operator" gorm:"foreignKey:FlightAuthorizationProposalID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Drones            []Drone                           `json:"drones" gorm:"foreignKey:FlightAuthorizationProposalID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	FlightPurpose     string                            `json:"flight_purpose" gorm:"not null"`

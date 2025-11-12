@@ -107,16 +107,27 @@ type Pilot struct {
 	PilotLicense                  PilotLicense `json:"pilot_license" gorm:"embedded"`
 }
 
+type FlightAuthorizationProposalStatus string
+
+const (
+	ProposalStatusPending   FlightAuthorizationProposalStatus = "PENDING"
+	ProposalStatusApproved  FlightAuthorizationProposalStatus = "APPROVED"
+	ProposalStatusNotified  FlightAuthorizationProposalStatus = "NOTIFIED"
+	ProposalStatusActivated FlightAuthorizationProposalStatus = "ACTIVATED"
+	ProposalStatusCompleted FlightAuthorizationProposalStatus = "COMPLETED"
+)
+
 type FlightAuthorizationProposal struct {
-	ID                uuid.UUID                   `json:"id" gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
-	Operator          Operator                    `json:"operator" gorm:"foreignKey:FlightAuthorizationProposalID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Drones            []Drone                     `json:"drones" gorm:"foreignKey:FlightAuthorizationProposalID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	FlightPurpose     string                      `json:"flight_purpose" gorm:"not null"`
-	FlightArea        []FlightArea                `json:"flight_area" gorm:"foreignKey:FlightAuthorizationProposalID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	OperatingDuration OperatingDuration           `json:"operating_duration" gorm:"embedded"`
-	Airport           string                      `json:"airport" gorm:"not null"`
-	Pilot             Pilot                       `json:"pilot" gorm:"foreignKey:FlightAuthorizationProposalID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	FilePaths         datatypes.JSONSlice[string] `json:"file_paths" gorm:"type:json"`
-	CreatedAt         time.Time                   `json:"created_at"`
-	UpdatedAt         time.Time                   `json:"updated_at"`
+	ID                uuid.UUID                         `json:"id" gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	Operator          Operator                          `json:"operator" gorm:"foreignKey:FlightAuthorizationProposalID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Drones            []Drone                           `json:"drones" gorm:"foreignKey:FlightAuthorizationProposalID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	FlightPurpose     string                            `json:"flight_purpose" gorm:"not null"`
+	FlightArea        []FlightArea                      `json:"flight_area" gorm:"foreignKey:FlightAuthorizationProposalID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	OperatingDuration OperatingDuration                 `json:"operating_duration" gorm:"embedded"`
+	Airport           string                            `json:"airport" gorm:"not null"`
+	Pilot             Pilot                             `json:"pilot" gorm:"foreignKey:FlightAuthorizationProposalID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	FilePaths         datatypes.JSONSlice[string]       `json:"file_paths" gorm:"type:json"`
+	Status            FlightAuthorizationProposalStatus `json:"status" gorm:"type:varchar(32);default:PENDING"`
+	CreatedAt         time.Time                         `json:"created_at"`
+	UpdatedAt         time.Time                         `json:"updated_at"`
 }

@@ -65,24 +65,24 @@ func New(s *stream.EmbeddedNats, cfg config.ServiceConfig, db *gorm.DB) *Service
 		log.Debug().Msgf("Added stream: %v", *info)
 	}
 
-	db.Migrator().DropTable(
-		//Authorization Form
-		&models.Operator{},
-		&models.Drone{},
-		&models.FlightArea{},
-		&models.Pilot{},
-		&models.FlightAuthorizationProposal{},
-		&models.FlightAreaCoordinate{},
-		//Authorization Approval
-		&models.FlightParameter{},
-		&models.AuthorizedFlightAreaCoordinate{},
-		&models.AuthorizedFlightArea{},
-		&models.FlightAuthorizationApproval{},
-		//Flight Notification
-		&models.IntendedFlightArea{},
-		&models.IntendedFlightAreaCoordinate{},
-		&models.FlightNotification{},
-	)
+	// db.Migrator().DropTable(
+	// 	//Authorization Form
+	// 	&models.Operator{},
+	// 	&models.Drone{},
+	// 	&models.FlightArea{},
+	// 	&models.Pilot{},
+	// 	&models.FlightAuthorizationProposal{},
+	// 	&models.FlightAreaCoordinate{},
+	// 	//Authorization Approval
+	// 	&models.FlightParameter{},
+	// 	&models.AuthorizedFlightAreaCoordinate{},
+	// 	&models.AuthorizedFlightArea{},
+	// 	&models.FlightAuthorizationApproval{},
+	// 	//Flight Notification
+	// 	&models.IntendedFlightArea{},
+	// 	&models.IntendedFlightAreaCoordinate{},
+	// 	&models.FlightNotification{},
+	// )
 
 	//Migrate DB
 	db.AutoMigrate(

@@ -216,12 +216,12 @@ func (s *Service) UpdateFlightAuthorizationProposal(ctx context.Context, id uuid
 			return err
 		}
 		updates := map[string]interface{}{
-			"name":           payload.Name,
-			"flight_purpose": payload.FlightPurpose,
-			"airport":        payload.Airport,
-			"duration":       payload.OperatingDuration.Duration,
-			"from_day":       payload.OperatingDuration.FromDay,
-			"to_day":         payload.OperatingDuration.ToDay,
+			"name":                      payload.Name,
+			"flight_purpose":            payload.FlightPurpose,
+			"take_off_and_landing_area": payload.TakeOffAndLandingArea,
+			"duration":                  payload.OperatingDuration.Duration,
+			"from_day":                  payload.OperatingDuration.FromDay,
+			"to_day":                    payload.OperatingDuration.ToDay,
 		}
 		if err := tx.Model(&models.FlightAuthorizationProposal{}).Where("id = ?", id).Updates(updates).Error; err != nil {
 			return err

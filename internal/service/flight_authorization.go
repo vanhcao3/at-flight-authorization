@@ -134,6 +134,7 @@ func (s *Service) UpdateFlightAuthorizationProposal(ctx context.Context, id uuid
 			return err
 		}
 		updates := map[string]interface{}{
+			"name":           payload.Name,
 			"flight_purpose": payload.FlightPurpose,
 			"airport":        payload.Airport,
 			"duration":       payload.OperatingDuration.Duration,
@@ -296,6 +297,7 @@ func (s *Service) UpdateFlightAuthorizationApproval(ctx context.Context, id uuid
 		}
 		oldProposalID := existing.FlightAuthorizationProposalID
 		updates := map[string]interface{}{
+			"name":                             payload.Name,
 			"flight_authorization_proposal_id": payload.FlightAuthorizationProposalID,
 			"flight_negotiation_authorities":   payload.FlightNegotiationAuthorities,
 			"duration":                         payload.AuthorizedOperatingDuration.Duration,
@@ -453,6 +455,7 @@ func (s *Service) UpdateFlightNotification(ctx context.Context, id uuid.UUID, pa
 			return err
 		}
 		updates := map[string]interface{}{
+			"name":                             payload.Name,
 			"flight_authorization_approval_id": payload.FlightAuthorizationApprovalID,
 			"duration":                         payload.IntendedOperatingDuration.Duration,
 			"from_day":                         payload.IntendedOperatingDuration.FromDay,

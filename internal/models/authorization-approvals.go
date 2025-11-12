@@ -43,6 +43,7 @@ type AuthorizedFlightArea struct {
 
 type FlightAuthorizationApproval struct {
 	ID                            uuid.UUID                   `json:"id" gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	Name                          string                      `json:"name" gorm:"not null"`
 	FlightAuthorizationProposalID uuid.UUID                   `json:"flight_authorization_proposal_id" gorm:"type:uuid;index"`
 	FlightAuthorizationProposal   FlightAuthorizationProposal `json:"flight_authorization_proposal" gorm:"foreignKey:FlightAuthorizationProposalID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	AuthorizedFlightArea          []AuthorizedFlightArea      `json:"authorized_flight_area" gorm:"foreignKey:FlightAuthorizationApprovalID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`

@@ -1,0 +1,22 @@
+nats:
+  bind_address: "0.0.0.0:4222"
+  node_name: "at-flight-authorization"
+http:
+  port: 8080
+grpc:
+  port: 8081
+postgres:
+  host: 172.31.248.56
+  port: 15432
+  name: "keycloak"
+  user: "keycloak"
+  password: "Vht@2025"
+  sslmode: "disable"
+rabbitmq:
+  host: "192.168.205.38"
+  port: 30072
+logger:
+  log_level: 0
+other:
+  tracing_host: 192.168.205.38
+  tracing_port: 32273

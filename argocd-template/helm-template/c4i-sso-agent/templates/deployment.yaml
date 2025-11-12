@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.namespace.sso }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+        release: {{ .Release.Name }}
+    spec:
+      volumes:
+      - name: {{ .Chart.Name }}
+        configMap:
+          name: {{ .Chart.Name }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+          volumeMounts:
+          - name: {{ .Chart.Name }}
+            mountPath: /app.yaml
+            subPath: app.yaml
+          livenessProbe:
+            failureThreshold: 3
+            periodSeconds: 2
+            httpGet:
+              path: /-/ready
+              port: http
+          startupProbe:
+            failureThreshold: 20
+            periodSeconds: 5
+            httpGet:
+              path: /-/healthy
+              port: http           

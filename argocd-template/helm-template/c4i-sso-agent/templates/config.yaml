@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}
+  namespace:  {{ .Values.namespace.sso }}
+data:
+  app.yaml: |+
+    mongo:    
+      host: "mongodb.{{ .Values.namespace.db }}"                        ## Example
+      port: 27017
+      name: "{{ .Chart.Name }}"
+      replica: ""
+      user: "mongo"
+      pass: "Vht@2021"
+    rabbitmq:
+      host: "rabbitmqcluster.{{ .Values.namespace.broker }}"
+      port: 5672
+    oauth:
+      admin_client_id: "admin-cli"
+      username: "admin"
+      password: "admin"
+      provider_hostname: "{{ .Values.oauth.provider_hostname }}"
+      provider_secure: false
+      realm: "c4i-sso"
+      client_id: "{{ .Values.unitcode }}"
+    nats:
+      bind_address: "0.0.0.0:10222"
+      bind_address_leaf_node: "0.0.0.0:10111"
+      node_name: "c4i-sso"
+      is_root: true

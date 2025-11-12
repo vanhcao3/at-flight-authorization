@@ -1,0 +1,8 @@
+
+event_info_config: { "_id" : "AFAD-SESSION-SCHEDULE_SEND-SESSIONS_CREATE", "event_source" : "afad-session-schedule", "event_type" : "create", "event_path" : "/send-sessions", "rest_http_method" : "POST", "event_info_key" : "EVENT-DATA", "path_param_index" : [ ], "request_param_index" : {  }, "request_body_index" : 1 }
+
+event_message_code: { "_id" : 10514, "name" : "INTELLIGENCE_METEOROLOGY_WEATHER_REFRESH", "_class" : "com.vht.afadeventapi.model.EventMessageCode" }
+
+event_rule: { "_id" : ObjectId("65c04053a26f5551e77bf7c6"), "eventCode" : "AFAD-REPORT-STD_TBTS-PK-F_PATCH", "event_publish" : "EVENT_PUBLISH_ALL", "event_broadcast" : "EVENT_BROADCAST_ALL", "event_process" : "EVENT_PROCESS_ALL", "event_store" : "EVENT_STORE_NONE", "event_type" : "patch", "event_service" : "afad-report-std" }
+
+event_subscription: { "_id" : ObjectId("6510ebe84a02ee8fb4b8eb94"), "event_code" : "TBNV-NGANH_NGANHS_DELETE", "endpoint" : "http://tbnv-nganh.afad:8080" }

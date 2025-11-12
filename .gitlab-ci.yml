@@ -1,0 +1,97 @@
+stages:
+  - attt
+  - report
+  - build
+  - package
+
+attt-sonarqube:
+  stage: attt
+  image: 172.20.1.22/proxy-cache/sonarsource/sonar-scanner-cli:latest
+  tags:
+    - attt-vq2
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  
+    GIT_DEPTH: "0" 
+  script: 
+    - sonar-scanner
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "develop"
+      allow_failure: false
+    - if: $CI_COMMIT_BRANCH == "attt" 
+      allow_failure: true
+    - when: manual
+      allow_failure: true
+
+report-sonarqube:
+  stage: report
+  image: registry.c4i.vn/vht-klocwork/klw_ubuntu:c4i_custom
+  tags: 
+    - attt-vq2
+  before_script:
+    - 'which ssh-agent || ( sudo apt-get update -y && sudo apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - echo "$REGISTRY_SSH_KEY_SVR" | tr -d '\r' | ssh-add - > /dev/null
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+  script: 
+    - projectKey=${CI_PROJECT_PATH//\//:}
+    - echo "run SonarQube to key $projectKey"
+    - |
+      echo "Get handle tool"
+      scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r root@192.168.203.115:/storage/attt-snq/handle_results.py $PWD/
+      scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r root@192.168.203.115:/storage/attt-snq/token.json $PWD/
+      echo "Done!"
+    - python3 handle_results.py $projectKey
+    - |
+      echo "Copy result to registry server"
+      if [[ CI_MERGE_REQUEST_TARGET_BRANCH_NAME != "prod" ]]
+      then
+        echo "Copying to root@192.168.203.115:/storage/attt-snq$PWD/$CI_COMMIT_BRANCH/att_$(date +%F).csv ..."
+        ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@192.168.203.115 "mkdir -p /storage/attt-snq$PWD/$CI_COMMIT_BRANCH"
+        scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r snq_result.csv root@192.168.203.115:/storage/attt-snq/$PWD/$CI_COMMIT_BRANCH/att_$(date +%F).csv
+      else
+        echo "Copying to root@192.168.203.115:/storage/attt-snq$PWD/prod/att_$(date +%F).csv ..."
+        ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@192.168.203.115 "mkdir -p /storage/attt-snq$PWD/prod"
+        scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r snq_result.csv root@192.168.203.115:/storage/attt-snq$PWD/prod/att_$(date +%F).csv
+      fi
+      echo "Done!"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "attt" || $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "prod"
+      allow_failure: false
+    - when: never
+  needs:
+    - job: attt-sonarqube
+      artifacts: true
+  artifacts:
+    name: "result"
+    paths:
+      - $PWD/snq_result.csv
+    expire_in: 30 mins
+    
+build:
+  stage: build
+  image: registry.c4i.vn/c4i/golang:1.19-buster
+  tags:
+    - builder
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  script:
+    - make go-build
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "develop" || $CI_COMMIT_BRANCH == "develop"
+      when: on_success
+    - when: manual
+      allow_failure: true
+
+package:
+  stage: package
+  tags:
+    - deployer
+  only:
+    - prod
+    - develop
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  script:
+    - make release
+  when: on_success

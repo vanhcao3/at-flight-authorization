@@ -1,0 +1,19 @@
+# Default values for helm of {{ go-template }} -> application's name
+# Declare variables to be passed into your templates.
+
+replicaCount: 1                                     ## -> number pod you want to have
+
+image:
+  repository: registry.c4i.vn/c4i/c4i-sso-agent ## -> name of repository of this application
+  tag: dev                           ## -> tag of this application
+  pullPolicy: Always
+
+
+namespace:                                          ## -> List of namespace for masking in helm
+  teca: afad                                        ## Example
+  c4i: vq2                                          ## Example
+  broker: vq2-broker                                ## Example
+  db: vq2-db                                        ## Example
+  sso: sso
+
+unitcode: qc                                        ## extended variable

@@ -1,0 +1,59 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: dev-c4i-sso-agent
+  namespace: argocd
+  resourceVersion: "1651035778"
+spec:
+  generators:
+  - git:
+      files:
+      - path: cluster-config/llq-sites/dev-sites/k8s-qc/config.json
+        path: cluster-config/llq-sites/dev-sites/k8s-f371/config.json
+      repoURL: git@192.168.205.151:vq21/vq2-deploy.git
+      revision: dev
+      template:
+        metadata: {}
+        spec:
+          destination: {}
+          project: default
+          source:
+            helm:
+              parameters:
+              - name: unitcode
+                value: '{{cluster.unitcode}}'
+              - name: mongo_root.ip
+                value: '{{cluster.qc_db}}'
+              - name: mongo_root.port
+                value: "32017"
+              - name: oauth.provider_hostname
+                value: '{{cluster.oauth.provider_hostname}}'
+            repoURL: ""
+  template:
+    metadata:
+      name: '{{cluster.name}}-c4i-sso-agent'
+    spec:
+      destination:
+        namespace: sso
+        server: '{{cluster.address}}'
+      ignoreDifferences:
+      - jsonPointers:
+        - /spec/type
+        kind: Service
+      project: default
+      source:
+        path: deploy/c4i-sso-agent
+        repoURL: git@192.168.205.151:vq21/vq2-deploy.git
+        targetRevision: dev
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: true
+        retry:
+          backoff:
+            duration: 5s
+            factor: 2
+          limit: 10
+        syncOptions:
+        - ApplyOutOfSyncOnly=true
+        - CreateNamespace=true

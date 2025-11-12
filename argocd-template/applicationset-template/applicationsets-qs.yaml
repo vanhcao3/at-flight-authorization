@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: MODE-go-template
+spec:
+  generators:
+  - git:
+      repoURL: http://GITIP/vq2/vq2-deploy.git
+      revision: REVISION_BRANCH
+      files:
+      - path: "cluster-config/qc-sites/UNITCODE/TYPESITE/**/config.json"
+      template:
+        metadata: {}
+        spec:
+          project: "default"
+          source:
+            repoURL: ""
+            helm:
+              parameters:
+              - name: unitcode
+                value: '{{cluster.unitcode}}'
+          destination: {}
+  template:
+    metadata:
+      name: '{{cluster.name}}-go-template'
+    spec:
+      project: default
+      source:
+        repoURL: http://GITIP/vq2/vq2-deploy.git
+        targetRevision: REVISION_BRANCH
+        path: "deploy/go-template"
+      destination:
+        server: '{{cluster.address}}'
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: true 
+        syncOptions:
+          - ApplyOutOfSyncOnly=true
+        retry:
+          limit: 10
+          backoff:
+            duration: 5s
+            factor: 2
+      ignoreDifferences:
+        - kind: Service
+          jsonPointers:
+            - /spec/type

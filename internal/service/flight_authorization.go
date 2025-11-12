@@ -46,21 +46,31 @@ func prepareProposalForCreate(payload *models.FlightAuthorizationProposal) {
 	if payload.ID == uuid.Nil {
 		payload.ID = uuid.New()
 	}
-	payload.Operator.ID = uuid.New()
+	if payload.Operator.ID == uuid.Nil {
+		payload.Operator.ID = uuid.New()
+	}
 	payload.Operator.FlightAuthorizationProposalID = payload.ID
 	for i := range payload.Drones {
-		payload.Drones[i].ID = uuid.New()
+		if payload.Drones[i].ID == uuid.Nil {
+			payload.Drones[i].ID = uuid.New()
+		}
 		payload.Drones[i].FlightAuthorizationProposalID = payload.ID
 	}
 	for i := range payload.FlightArea {
-		payload.FlightArea[i].ID = uuid.New()
+		if payload.FlightArea[i].ID == uuid.Nil {
+			payload.FlightArea[i].ID = uuid.New()
+		}
 		payload.FlightArea[i].FlightAuthorizationProposalID = payload.ID
 		for j := range payload.FlightArea[i].Polygon {
-			payload.FlightArea[i].Polygon[j].ID = uuid.New()
+			if payload.FlightArea[i].Polygon[j].ID == uuid.Nil {
+				payload.FlightArea[i].Polygon[j].ID = uuid.New()
+			}
 			payload.FlightArea[i].Polygon[j].FlightAreaID = payload.FlightArea[i].ID
 		}
 	}
-	payload.Pilot.ID = uuid.New()
+	if payload.Pilot.ID == uuid.Nil {
+		payload.Pilot.ID = uuid.New()
+	}
 	payload.Pilot.FlightAuthorizationProposalID = payload.ID
 }
 
@@ -72,14 +82,20 @@ func prepareApprovalForCreate(payload *models.FlightAuthorizationApproval) {
 		payload.ID = uuid.New()
 	}
 	for i := range payload.AuthorizedFlightArea {
-		payload.AuthorizedFlightArea[i].ID = uuid.New()
+		if payload.AuthorizedFlightArea[i].ID == uuid.Nil {
+			payload.AuthorizedFlightArea[i].ID = uuid.New()
+		}
 		payload.AuthorizedFlightArea[i].FlightAuthorizationApprovalID = payload.ID
 		for j := range payload.AuthorizedFlightArea[i].Polygon {
-			payload.AuthorizedFlightArea[i].Polygon[j].ID = uuid.New()
+			if payload.AuthorizedFlightArea[i].Polygon[j].ID == uuid.Nil {
+				payload.AuthorizedFlightArea[i].Polygon[j].ID = uuid.New()
+			}
 			payload.AuthorizedFlightArea[i].Polygon[j].AuthorizedFlightAreaID = payload.AuthorizedFlightArea[i].ID
 		}
 	}
-	payload.FlightParameter.ID = uuid.New()
+	if payload.FlightParameter.ID == uuid.Nil {
+		payload.FlightParameter.ID = uuid.New()
+	}
 	payload.FlightParameter.FlightAuthorizationApprovalID = payload.ID
 }
 
@@ -91,10 +107,14 @@ func prepareNotificationForCreate(payload *models.FlightNotification) {
 		payload.ID = uuid.New()
 	}
 	for i := range payload.IntendedFlightArea {
-		payload.IntendedFlightArea[i].ID = uuid.New()
+		if payload.IntendedFlightArea[i].ID == uuid.Nil {
+			payload.IntendedFlightArea[i].ID = uuid.New()
+		}
 		payload.IntendedFlightArea[i].FlightNotificationID = payload.ID
 		for j := range payload.IntendedFlightArea[i].Polygon {
-			payload.IntendedFlightArea[i].Polygon[j].ID = uuid.New()
+			if payload.IntendedFlightArea[i].Polygon[j].ID == uuid.Nil {
+				payload.IntendedFlightArea[i].Polygon[j].ID = uuid.New()
+			}
 			payload.IntendedFlightArea[i].Polygon[j].IntendedFlightAreaID = payload.IntendedFlightArea[i].ID
 		}
 	}

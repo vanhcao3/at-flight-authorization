@@ -24,10 +24,11 @@ import (
 var rdb *redis.Client
 
 type Service struct {
-	DbClient *qmgo.Client
-	nats     *stream.EmbeddedNats
-	cfg      config.ServiceConfig
-	db       *gorm.DB
+	DbClient       *qmgo.Client
+	nats           *stream.EmbeddedNats
+	cfg            config.ServiceConfig
+	db             *gorm.DB
+	statusInterval time.Duration
 }
 
 var tracer = otel.Tracer("at-flight-authorization-service")
@@ -103,11 +104,16 @@ func New(s *stream.EmbeddedNats, cfg config.ServiceConfig, db *gorm.DB) *Service
 		&models.FlightNotification{},
 	)
 
-	return &Service{
-		nats: s,
-		cfg:  cfg,
-		db:   db,
+	svc := &Service{
+		nats:           s,
+		cfg:            cfg,
+		db:             db,
+		statusInterval: time.Minute,
 	}
+
+	svc.startProposalStatusWatcher()
+
+	return svc
 }
 
 func redisSet(key string, value interface{}) error {

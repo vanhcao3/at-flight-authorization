@@ -3,9 +3,11 @@ package service
 import (
 	"context"
 	"errors"
+	"time"
 
 	"172.21.5.249/airtrans/at-flight-authorization/internal/models"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 )
 
@@ -41,6 +43,7 @@ func (s *Service) CreateFlightAuthorizationProposal(ctx context.Context, payload
 	if payload == nil {
 		return nil, errors.New("payload is nil")
 	}
+	payload.Status = models.ProposalStatusPending
 	err := s.db.WithContext(ctx).Session(&gorm.Session{FullSaveAssociations: true}).Create(payload).Error
 	if err != nil {
 		return nil, err
@@ -81,6 +84,8 @@ func applyProposalFilters(tx *gorm.DB, filters map[string][]string) (*gorm.DB, e
 			tx = tx.Where("flight_purpose = ?", value)
 		case "airport":
 			tx = tx.Where("airport = ?", value)
+		case "status":
+			tx = tx.Where("status = ?", value)
 		default:
 		}
 	}
@@ -197,12 +202,16 @@ func (s *Service) CreateFlightAuthorizationApproval(ctx context.Context, payload
 	if payload == nil {
 		return nil, errors.New("payload is nil")
 	}
-	err := s.db.WithContext(ctx).Session(&gorm.Session{FullSaveAssociations: true}).Create(payload).Error
-	if err != nil {
-		return nil, err
-	}
 	var out models.FlightAuthorizationApproval
-	err = approvalPreload(s.db.WithContext(ctx)).First(&out, "id = ?", payload.ID).Error
+	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Session(&gorm.Session{FullSaveAssociations: true}).Create(payload).Error; err != nil {
+			return err
+		}
+		if err := s.recalcProposalStatusWithTx(ctx, tx, payload.FlightAuthorizationProposalID); err != nil {
+			return err
+		}
+		return approvalPreload(tx).First(&out, "id = ?", payload.ID).Error
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -285,6 +294,7 @@ func (s *Service) UpdateFlightAuthorizationApproval(ctx context.Context, id uuid
 		if err := tx.First(&existing, "id = ?", id).Error; err != nil {
 			return err
 		}
+		oldProposalID := existing.FlightAuthorizationProposalID
 		updates := map[string]interface{}{
 			"flight_authorization_proposal_id": payload.FlightAuthorizationProposalID,
 			"flight_negotiation_authorities":   payload.FlightNegotiationAuthorities,
@@ -313,7 +323,18 @@ func (s *Service) UpdateFlightAuthorizationApproval(ctx context.Context, id uuid
 		if err := tx.Create(&payload.FlightParameter).Error; err != nil {
 			return err
 		}
-		return approvalPreload(tx).First(&result, "id = ?", id).Error
+		if err := approvalPreload(tx).First(&result, "id = ?", id).Error; err != nil {
+			return err
+		}
+		if err := s.recalcProposalStatusWithTx(ctx, tx, result.FlightAuthorizationProposalID); err != nil {
+			return err
+		}
+		if oldProposalID != result.FlightAuthorizationProposalID {
+			if err := s.recalcProposalStatusWithTx(ctx, tx, oldProposalID); err != nil {
+				return err
+			}
+		}
+		return nil
 	})
 	if err != nil {
 		return nil, err
@@ -322,26 +343,33 @@ func (s *Service) UpdateFlightAuthorizationApproval(ctx context.Context, id uuid
 }
 
 func (s *Service) DeleteFlightAuthorizationApproval(ctx context.Context, id uuid.UUID) error {
-	res := s.db.WithContext(ctx).Delete(&models.FlightAuthorizationApproval{}, "id = ?", id)
-	if res.Error != nil {
-		return res.Error
-	}
-	if res.RowsAffected == 0 {
-		return gorm.ErrRecordNotFound
-	}
-	return nil
+	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var approval models.FlightAuthorizationApproval
+		if err := tx.First(&approval, "id = ?", id).Error; err != nil {
+			return err
+		}
+		if err := tx.Delete(&models.FlightAuthorizationApproval{}, "id = ?", id).Error; err != nil {
+			return err
+		}
+		return s.recalcProposalStatusWithTx(ctx, tx, approval.FlightAuthorizationProposalID)
+	})
 }
 
 func (s *Service) CreateFlightNotification(ctx context.Context, payload *models.FlightNotification) (*models.FlightNotification, error) {
 	if payload == nil {
 		return nil, errors.New("payload is nil")
 	}
-	err := s.db.WithContext(ctx).Session(&gorm.Session{FullSaveAssociations: true}).Create(payload).Error
-	if err != nil {
-		return nil, err
-	}
 	var out models.FlightNotification
-	err = notificationPreload(s.db.WithContext(ctx)).First(&out, "id = ?", payload.ID).Error
+	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Session(&gorm.Session{FullSaveAssociations: true}).Create(payload).Error; err != nil {
+			return err
+		}
+		if err := notificationPreload(tx).First(&out, "id = ?", payload.ID).Error; err != nil {
+			return err
+		}
+		proposalID := out.FlightAuthorizationApproval.FlightAuthorizationProposalID
+		return s.recalcProposalStatusWithTx(ctx, tx, proposalID)
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -444,7 +472,11 @@ func (s *Service) UpdateFlightNotification(ctx context.Context, id uuid.UUID, pa
 				return err
 			}
 		}
-		return notificationPreload(tx).First(&result, "id = ?", id).Error
+		if err := notificationPreload(tx).First(&result, "id = ?", id).Error; err != nil {
+			return err
+		}
+		proposalID := result.FlightAuthorizationApproval.FlightAuthorizationProposalID
+		return s.recalcProposalStatusWithTx(ctx, tx, proposalID)
 	})
 	if err != nil {
 		return nil, err
@@ -453,12 +485,141 @@ func (s *Service) UpdateFlightNotification(ctx context.Context, id uuid.UUID, pa
 }
 
 func (s *Service) DeleteFlightNotification(ctx context.Context, id uuid.UUID) error {
-	res := s.db.WithContext(ctx).Delete(&models.FlightNotification{}, "id = ?", id)
-	if res.Error != nil {
-		return res.Error
+	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var notification models.FlightNotification
+		if err := notificationPreload(tx).First(&notification, "id = ?", id).Error; err != nil {
+			return err
+		}
+		if err := tx.Delete(&models.FlightNotification{}, "id = ?", id).Error; err != nil {
+			return err
+		}
+		proposalID := notification.FlightAuthorizationApproval.FlightAuthorizationProposalID
+		return s.recalcProposalStatusWithTx(ctx, tx, proposalID)
+	})
+}
+
+func (s *Service) recalcProposalStatus(ctx context.Context, proposalID uuid.UUID) error {
+	return s.recalcProposalStatusWithTx(ctx, s.db.WithContext(ctx), proposalID)
+}
+
+func (s *Service) recalcProposalStatusWithTx(ctx context.Context, tx *gorm.DB, proposalID uuid.UUID) error {
+	if proposalID == uuid.Nil {
+		return nil
 	}
-	if res.RowsAffected == 0 {
-		return gorm.ErrRecordNotFound
+	var notifications []models.FlightNotification
+	err := tx.
+		Joins("JOIN flight_authorization_approvals ON flight_authorization_approvals.id = flight_notifications.flight_authorization_approval_id").
+		Where("flight_authorization_approvals.flight_authorization_proposal_id = ?", proposalID).
+		Find(&notifications).Error
+	if err != nil {
+		return err
+	}
+	now := time.Now()
+	if len(notifications) == 0 {
+		var approvalsCount int64
+		if err := tx.Model(&models.FlightAuthorizationApproval{}).
+			Where("flight_authorization_proposal_id = ?", proposalID).
+			Count(&approvalsCount).Error; err != nil {
+			return err
+		}
+		status := models.ProposalStatusPending
+		if approvalsCount > 0 {
+			status = models.ProposalStatusApproved
+		}
+		return tx.Model(&models.FlightAuthorizationProposal{}).
+			Where("id = ?", proposalID).
+			Update("status", status).Error
+	}
+	idx := 0
+	for i := 1; i < len(notifications); i++ {
+		if isLaterDuration(notifications[i].IntendedOperatingDuration, notifications[idx].IntendedOperatingDuration) {
+			idx = i
+		}
+	}
+	status := proposalStatusFromNotification(now, notifications[idx].IntendedOperatingDuration)
+	return tx.Model(&models.FlightAuthorizationProposal{}).
+		Where("id = ?", proposalID).
+		Update("status", status).Error
+}
+
+func isLaterDuration(a, b models.OperatingDuration) bool {
+	if a.ToDay.IsZero() {
+		if b.ToDay.IsZero() {
+			if a.FromDay.IsZero() {
+				return false
+			}
+			if b.FromDay.IsZero() {
+				return false
+			}
+			return a.FromDay.After(b.FromDay)
+		}
+		return false
+	}
+	if b.ToDay.IsZero() {
+		return true
+	}
+	if a.ToDay.Equal(b.ToDay) {
+		if a.FromDay.IsZero() {
+			return false
+		}
+		if b.FromDay.IsZero() {
+			return true
+		}
+		return a.FromDay.After(b.FromDay)
+	}
+	return a.ToDay.After(b.ToDay)
+}
+
+func proposalStatusFromNotification(now time.Time, duration models.OperatingDuration) models.FlightAuthorizationProposalStatus {
+	if duration.FromDay.IsZero() || duration.ToDay.IsZero() {
+		return models.ProposalStatusNotified
+	}
+	if now.Before(duration.FromDay) {
+		return models.ProposalStatusNotified
+	}
+	if now.After(duration.ToDay) {
+		return models.ProposalStatusCompleted
+	}
+	return models.ProposalStatusActivated
+}
+
+func (s *Service) refreshProposalStatuses(ctx context.Context) error {
+	var proposalIDs []uuid.UUID
+	err := s.db.WithContext(ctx).
+		Model(&models.FlightAuthorizationProposal{}).
+		Where("status IN ?", []models.FlightAuthorizationProposalStatus{
+			models.ProposalStatusNotified,
+			models.ProposalStatusActivated,
+		}).
+		Pluck("id", &proposalIDs).Error
+	if err != nil {
+		return err
+	}
+	for _, id := range proposalIDs {
+		if err := s.recalcProposalStatus(ctx, id); err != nil {
+			return err
+		}
 	}
 	return nil
+}
+
+func (s *Service) startProposalStatusWatcher() {
+	interval := s.statusInterval
+	if interval <= 0 {
+		interval = time.Minute
+	}
+	go func() {
+		if err := s.refreshProposalStatuses(context.Background()); err != nil {
+			log.Error().Err(err).Msg("refresh proposal statuses")
+		}
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		for range ticker.C {
+			ctx, cancel := context.WithTimeout(context.Background(), interval)
+			if err := s.refreshProposalStatuses(ctx); err != nil {
+				log.Error().Err(err).Msg("refresh proposal statuses")
+			}
+			cancel()
+		}
+	}()
 }

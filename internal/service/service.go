@@ -29,6 +29,7 @@ type Service struct {
 	cfg            config.ServiceConfig
 	db             *gorm.DB
 	statusInterval time.Duration
+	notifier       *Notifier
 }
 
 var tracer = otel.Tracer("at-flight-authorization-service")
@@ -109,6 +110,7 @@ func New(s *stream.EmbeddedNats, cfg config.ServiceConfig, db *gorm.DB) *Service
 		cfg:            cfg,
 		db:             db,
 		statusInterval: time.Minute,
+		notifier:       NewNotifier(),
 	}
 
 	svc.startProposalStatusWatcher()
@@ -127,6 +129,10 @@ func redisSet(key string, value interface{}) error {
 	}
 	rdb.Set(context.Background(), key, val, 0)
 	return nil
+}
+
+func (s *Service) Notifier() *Notifier {
+	return s.notifier
 }
 
 func redisGet(key string, dest interface{}) error {

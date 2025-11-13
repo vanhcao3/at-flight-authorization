@@ -26,6 +26,7 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-tpm v0.9.4 // indirect
 	github.com/google/uuid v1.6.0
+	github.com/gorilla/websocket v1.5.1
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/hashicorp/hcl v1.0.0 // indirect

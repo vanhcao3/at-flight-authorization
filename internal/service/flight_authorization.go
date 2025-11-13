@@ -135,6 +135,9 @@ func (s *Service) CreateFlightAuthorizationProposal(ctx context.Context, payload
 	if err != nil {
 		return nil, err
 	}
+	if err := s.notifier.Publish(EventFlightAuthorizationProposalCreated, out); err != nil {
+		log.Error().Err(err).Msg("publish proposal created")
+	}
 	return &out, nil
 }
 
@@ -313,6 +316,9 @@ func (s *Service) CreateFlightAuthorizationApproval(ctx context.Context, payload
 	if err != nil {
 		return nil, err
 	}
+	if err := s.notifier.Publish(EventFlightAuthorizationApprovalCreated, out); err != nil {
+		log.Error().Err(err).Msg("publish approval created")
+	}
 	return &out, nil
 }
 
@@ -484,6 +490,9 @@ func (s *Service) CreateFlightNotification(ctx context.Context, payload *models.
 	})
 	if err != nil {
 		return nil, err
+	}
+	if err := s.notifier.Publish(EventFlightNotificationCreated, out); err != nil {
+		log.Error().Err(err).Msg("publish notification created")
 	}
 	return &out, nil
 }

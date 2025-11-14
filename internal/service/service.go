@@ -110,7 +110,7 @@ func New(s *stream.EmbeddedNats, cfg config.ServiceConfig, db *gorm.DB) *Service
 		cfg:            cfg,
 		db:             db,
 		statusInterval: time.Minute,
-		notifier:       NewNotifier(),
+		notifier:       NewNotifier(s.Client),
 	}
 
 	svc.startProposalStatusWatcher()

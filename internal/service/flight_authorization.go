@@ -120,6 +120,12 @@ func prepareNotificationForCreate(payload *models.FlightNotification) {
 	}
 }
 
+type FlightNotificationOverlapEvent struct {
+	FlightAuthorizationApprovalID uuid.UUID                   `json:"flight_authorization_approval_id"`
+	NewNotification               models.FlightNotification   `json:"new_notification"`
+	OverlappingNotifications      []models.FlightNotification `json:"overlapping_notifications"`
+}
+
 func (s *Service) CreateFlightAuthorizationProposal(ctx context.Context, payload *models.FlightAuthorizationProposal) (*models.FlightAuthorizationProposal, error) {
 	if payload == nil {
 		return nil, errors.New("payload is nil")
@@ -478,7 +484,26 @@ func (s *Service) CreateFlightNotification(ctx context.Context, payload *models.
 	}
 	prepareNotificationForCreate(payload)
 	var out models.FlightNotification
+	var overlapped []models.FlightNotification
 	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if payload.FlightAuthorizationApprovalID != uuid.Nil &&
+			!payload.IntendedOperatingDuration.FromDay.IsZero() &&
+			!payload.IntendedOperatingDuration.ToDay.IsZero() {
+			var candidates []models.FlightNotification
+			err := notificationPreload(tx).
+				Where("flight_authorization_approval_id = ?", payload.FlightAuthorizationApprovalID).
+				Where("to_day >= ?", payload.IntendedOperatingDuration.FromDay).
+				Where("from_day <= ?", payload.IntendedOperatingDuration.ToDay).
+				Find(&candidates).Error
+			if err != nil {
+				return err
+			}
+			for _, item := range candidates {
+				if durationsOverlap(item.IntendedOperatingDuration, payload.IntendedOperatingDuration) {
+					overlapped = append(overlapped, item)
+				}
+			}
+		}
 		if err := tx.Session(&gorm.Session{FullSaveAssociations: true}).Create(payload).Error; err != nil {
 			return err
 		}
@@ -493,6 +518,16 @@ func (s *Service) CreateFlightNotification(ctx context.Context, payload *models.
 	}
 	if err := s.notifier.Publish(EventFlightNotificationCreated, out); err != nil {
 		log.Error().Err(err).Msg("publish notification created")
+	}
+	if len(overlapped) > 0 {
+		event := FlightNotificationOverlapEvent{
+			FlightAuthorizationApprovalID: out.FlightAuthorizationApprovalID,
+			NewNotification:               out,
+			OverlappingNotifications:      overlapped,
+		}
+		if err := s.notifier.Publish(EventFlightNotificationOverlapped, event); err != nil {
+			log.Error().Err(err).Msg("publish notification overlapped")
+		}
 	}
 	return &out, nil
 }
@@ -671,6 +706,19 @@ func (s *Service) recalcProposalStatusWithTx(ctx context.Context, tx *gorm.DB, p
 	return tx.Model(&models.FlightAuthorizationProposal{}).
 		Where("id = ?", proposalID).
 		Update("status", status).Error
+}
+
+func durationsOverlap(a, b models.OperatingDuration) bool {
+	if a.FromDay.IsZero() || a.ToDay.IsZero() || b.FromDay.IsZero() || b.ToDay.IsZero() {
+		return false
+	}
+	if a.ToDay.Before(b.FromDay) {
+		return false
+	}
+	if b.ToDay.Before(a.FromDay) {
+		return false
+	}
+	return true
 }
 
 func isLaterDuration(a, b models.OperatingDuration) bool {

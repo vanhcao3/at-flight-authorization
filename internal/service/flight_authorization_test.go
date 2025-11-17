@@ -81,3 +81,76 @@ func TestDurationsOverlap(t *testing.T) {
 		})
 	}
 }
+
+func newNotification(from, to string) models.FlightNotification {
+	return models.FlightNotification{
+		IntendedOperatingDuration: models.OperatingDuration{
+			FromDay: mustParseTime(from),
+			ToDay:   mustParseTime(to),
+		},
+	}
+}
+
+func TestHasOverlappingNotifications(t *testing.T) {
+	overlapping := []models.FlightNotification{
+		newNotification("2025-01-01T00:00:00Z", "2025-01-02T00:00:00Z"),
+		newNotification("2025-01-01T12:00:00Z", "2025-01-03T00:00:00Z"),
+	}
+	nonOverlapping := []models.FlightNotification{
+		newNotification("2025-01-01T00:00:00Z", "2025-01-02T00:00:00Z"),
+		newNotification("2025-01-03T00:00:00Z", "2025-01-04T00:00:00Z"),
+	}
+	if !hasOverlappingNotifications(overlapping) {
+		t.Fatalf("expected overlapping notifications to be detected")
+	}
+	if hasOverlappingNotifications(nonOverlapping) {
+		t.Fatalf("expected non-overlapping notifications to be ignored")
+	}
+}
+
+func TestProposalStatusFromNotifications(t *testing.T) {
+	now := mustParseTime("2025-01-01T06:00:00Z")
+	tests := []struct {
+		name           string
+		notifications  []models.FlightNotification
+		expectedStatus models.FlightAuthorizationProposalStatus
+	}{
+		{
+			name: "overlapping notifications pending",
+			notifications: []models.FlightNotification{
+				newNotification("2025-01-01T00:00:00Z", "2025-01-02T00:00:00Z"),
+				newNotification("2025-01-01T12:00:00Z", "2025-01-02T12:00:00Z"),
+			},
+			expectedStatus: models.ProposalStatusPending,
+		},
+		{
+			name: "future notification notified",
+			notifications: []models.FlightNotification{
+				newNotification("2025-02-01T00:00:00Z", "2025-02-02T00:00:00Z"),
+			},
+			expectedStatus: models.ProposalStatusNotified,
+		},
+		{
+			name: "active notification activated",
+			notifications: []models.FlightNotification{
+				newNotification("2024-12-30T00:00:00Z", "2025-01-05T00:00:00Z"),
+			},
+			expectedStatus: models.ProposalStatusActivated,
+		},
+		{
+			name: "completed notification completed",
+			notifications: []models.FlightNotification{
+				newNotification("2024-12-01T00:00:00Z", "2024-12-02T00:00:00Z"),
+			},
+			expectedStatus: models.ProposalStatusCompleted,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			status := proposalStatusFromNotifications(now, tt.notifications)
+			if status != tt.expectedStatus {
+				t.Fatalf("expected %s, got %s", tt.expectedStatus, status)
+			}
+		})
+	}
+}

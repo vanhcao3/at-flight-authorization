@@ -696,13 +696,7 @@ func (s *Service) recalcProposalStatusWithTx(ctx context.Context, tx *gorm.DB, p
 			Where("id = ?", proposalID).
 			Update("status", status).Error
 	}
-	idx := 0
-	for i := 1; i < len(notifications); i++ {
-		if isLaterDuration(notifications[i].IntendedOperatingDuration, notifications[idx].IntendedOperatingDuration) {
-			idx = i
-		}
-	}
-	status := proposalStatusFromNotification(now, notifications[idx].IntendedOperatingDuration)
+	status := proposalStatusFromNotifications(now, notifications)
 	return tx.Model(&models.FlightAuthorizationProposal{}).
 		Where("id = ?", proposalID).
 		Update("status", status).Error
@@ -719,6 +713,33 @@ func durationsOverlap(a, b models.OperatingDuration) bool {
 		return false
 	}
 	return true
+}
+
+func hasOverlappingNotifications(notifications []models.FlightNotification) bool {
+	for i := 0; i < len(notifications); i++ {
+		for j := i + 1; j < len(notifications); j++ {
+			if durationsOverlap(notifications[i].IntendedOperatingDuration, notifications[j].IntendedOperatingDuration) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func proposalStatusFromNotifications(now time.Time, notifications []models.FlightNotification) models.FlightAuthorizationProposalStatus {
+	if len(notifications) == 0 {
+		return models.ProposalStatusPending
+	}
+	if hasOverlappingNotifications(notifications) {
+		return models.ProposalStatusPending
+	}
+	idx := 0
+	for i := 1; i < len(notifications); i++ {
+		if isLaterDuration(notifications[i].IntendedOperatingDuration, notifications[idx].IntendedOperatingDuration) {
+			idx = i
+		}
+	}
+	return proposalStatusFromNotification(now, notifications[idx].IntendedOperatingDuration)
 }
 
 func isLaterDuration(a, b models.OperatingDuration) bool {

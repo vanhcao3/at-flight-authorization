@@ -504,6 +504,7 @@ func (s *Service) CreateFlightNotification(ctx context.Context, payload *models.
 				}
 			}
 		}
+		payload.Status = notificationStatusFromOverlap(len(overlapped) > 0)
 		if err := tx.Session(&gorm.Session{FullSaveAssociations: true}).Create(payload).Error; err != nil {
 			return err
 		}
@@ -696,7 +697,13 @@ func (s *Service) recalcProposalStatusWithTx(ctx context.Context, tx *gorm.DB, p
 			Where("id = ?", proposalID).
 			Update("status", status).Error
 	}
-	status := proposalStatusFromNotifications(now, notifications)
+	idx := 0
+	for i := 1; i < len(notifications); i++ {
+		if isLaterDuration(notifications[i].IntendedOperatingDuration, notifications[idx].IntendedOperatingDuration) {
+			idx = i
+		}
+	}
+	status := proposalStatusFromNotification(now, notifications[idx].IntendedOperatingDuration)
 	return tx.Model(&models.FlightAuthorizationProposal{}).
 		Where("id = ?", proposalID).
 		Update("status", status).Error
@@ -715,31 +722,11 @@ func durationsOverlap(a, b models.OperatingDuration) bool {
 	return true
 }
 
-func hasOverlappingNotifications(notifications []models.FlightNotification) bool {
-	for i := 0; i < len(notifications); i++ {
-		for j := i + 1; j < len(notifications); j++ {
-			if durationsOverlap(notifications[i].IntendedOperatingDuration, notifications[j].IntendedOperatingDuration) {
-				return true
-			}
-		}
+func notificationStatusFromOverlap(hasOverlap bool) models.FlightNotificationStatus {
+	if hasOverlap {
+		return models.FlightNotificationStatusPending
 	}
-	return false
-}
-
-func proposalStatusFromNotifications(now time.Time, notifications []models.FlightNotification) models.FlightAuthorizationProposalStatus {
-	if len(notifications) == 0 {
-		return models.ProposalStatusPending
-	}
-	if hasOverlappingNotifications(notifications) {
-		return models.ProposalStatusPending
-	}
-	idx := 0
-	for i := 1; i < len(notifications); i++ {
-		if isLaterDuration(notifications[i].IntendedOperatingDuration, notifications[idx].IntendedOperatingDuration) {
-			idx = i
-		}
-	}
-	return proposalStatusFromNotification(now, notifications[idx].IntendedOperatingDuration)
+	return models.FlightNotificationStatusActivated
 }
 
 func isLaterDuration(a, b models.OperatingDuration) bool {

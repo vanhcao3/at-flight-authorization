@@ -2,6 +2,13 @@ package models
 
 import "github.com/google/uuid"
 
+type FlightNotificationStatus string
+
+const (
+	FlightNotificationStatusPending   FlightNotificationStatus = "PENDING"
+	FlightNotificationStatusActivated FlightNotificationStatus = "ACTIVATED"
+)
+
 type IntendedFlightAreaCoordinate struct {
 	ID                   uuid.UUID `json:"id" gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	IntendedFlightAreaID uuid.UUID `json:"intended_flight_area_id" gorm:"type:uuid;index"`
@@ -27,4 +34,5 @@ type FlightNotification struct {
 	FlightAuthorizationApproval   FlightAuthorizationApproval `json:"flight_authorization_approval" gorm:"foreignKey:FlightAuthorizationApprovalID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	IntendedOperatingDuration     OperatingDuration           `json:"intended_operating_duration" gorm:"embedded"`
 	IntendedFlightArea            []IntendedFlightArea        `json:"intended_flight_area" gorm:"foreignKey:FlightNotificationID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Status                        FlightNotificationStatus    `json:"status" gorm:"type:varchar(32);default:PENDING"`
 }

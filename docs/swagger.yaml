@@ -200,7 +200,17 @@ definitions:
         $ref: '#/definitions/models.OperatingDuration'
       name:
         type: string
+      status:
+        $ref: '#/definitions/models.FlightNotificationStatus'
     type: object
+    models.FlightNotificationStatus:
+      enum:
+      - PENDING
+      - ACTIVATED
+      type: string
+      x-enum-varnames:
+      - FlightNotificationStatusPending
+      - FlightNotificationStatusActivated
   models.FlightParameter:
     properties:
       altitude:

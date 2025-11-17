@@ -23,7 +23,1253 @@ const docTemplate = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {}
+    "paths": {
+        "/flight-authorization-approvals": {
+            "get": {
+                "description": "List flight authorization approvals filtered by query parameters",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flight-authorization-approvals"
+                ],
+                "summary": "List flight authorization approvals",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (starting from 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by proposal ID",
+                        "name": "flight_authorization_proposal_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new flight authorization approval with associated areas and parameters",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flight-authorization-approvals"
+                ],
+                "summary": "Create flight authorization approval",
+                "parameters": [
+                    {
+                        "description": "Flight authorization approval payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.FlightAuthorizationApproval"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.FlightAuthorizationApproval"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/flight-authorization-approvals/{id}": {
+            "get": {
+                "description": "Retrieve a flight authorization approval by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flight-authorization-approvals"
+                ],
+                "summary": "Get flight authorization approval",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Flight authorization approval ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.FlightAuthorizationApproval"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a flight authorization approval and its related resources",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flight-authorization-approvals"
+                ],
+                "summary": "Update flight authorization approval",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Flight authorization approval ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Flight authorization approval payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.FlightAuthorizationApproval"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.FlightAuthorizationApproval"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a flight authorization approval by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flight-authorization-approvals"
+                ],
+                "summary": "Delete flight authorization approval",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Flight authorization approval ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.SucceedResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/flight-authorization-proposals": {
+            "get": {
+                "description": "List flight authorization proposals filtered by query parameters",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flight-authorization-proposals"
+                ],
+                "summary": "List flight authorization proposals",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (starting from 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by flight purpose",
+                        "name": "flight_purpose",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by airport",
+                        "name": "airport",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new flight authorization proposal with nested resources",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flight-authorization-proposals"
+                ],
+                "summary": "Create flight authorization proposal",
+                "parameters": [
+                    {
+                        "description": "Flight authorization proposal payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.FlightAuthorizationProposal"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.FlightAuthorizationProposal"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/flight-authorization-proposals/{id}": {
+            "get": {
+                "description": "Retrieve a flight authorization proposal by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flight-authorization-proposals"
+                ],
+                "summary": "Get flight authorization proposal",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Flight authorization proposal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.FlightAuthorizationProposal"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a flight authorization proposal and its nested resources",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flight-authorization-proposals"
+                ],
+                "summary": "Update flight authorization proposal",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Flight authorization proposal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Flight authorization proposal payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.FlightAuthorizationProposal"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.FlightAuthorizationProposal"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a flight authorization proposal by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flight-authorization-proposals"
+                ],
+                "summary": "Delete flight authorization proposal",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Flight authorization proposal ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.SucceedResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/flight-notifications": {
+            "get": {
+                "description": "List flight notifications filtered by query parameters",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flight-notifications"
+                ],
+                "summary": "List flight notifications",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page number (starting from 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page size",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Filter by approval ID",
+                        "name": "flight_authorization_approval_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a new flight notification associated with an approval",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flight-notifications"
+                ],
+                "summary": "Create flight notification",
+                "parameters": [
+                    {
+                        "description": "Flight notification payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.FlightNotification"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.FlightNotification"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/flight-notifications/{id}": {
+            "get": {
+                "description": "Retrieve a flight notification by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flight-notifications"
+                ],
+                "summary": "Get flight notification",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Flight notification ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.FlightNotification"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update a flight notification and its intended flight areas",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flight-notifications"
+                ],
+                "summary": "Update flight notification",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Flight notification ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Flight notification payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.FlightNotification"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.FlightNotification"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a flight notification by ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flight-notifications"
+                ],
+                "summary": "Delete flight notification",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Flight notification ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/types.SucceedResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/types.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.AuthorizedFlightArea": {
+            "type": "object",
+            "properties": {
+                "altitude": {
+                    "type": "string"
+                },
+                "commune": {
+                    "type": "string"
+                },
+                "flight_authorization_approval_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "place": {
+                    "type": "string"
+                },
+                "polygon": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.AuthorizedFlightAreaCoordinate"
+                    }
+                },
+                "province": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.AuthorizedFlightAreaCoordinate": {
+            "type": "object",
+            "properties": {
+                "authorized_flight_area_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.Date": {
+            "type": "object",
+            "properties": {
+                "time.Time": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Dimension": {
+            "type": "object",
+            "properties": {
+                "height": {
+                    "type": "integer"
+                },
+                "length": {
+                    "type": "integer"
+                },
+                "width": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Drone": {
+            "type": "object",
+            "properties": {
+                "drone_registration": {
+                    "$ref": "#/definitions/models.DroneRegistration"
+                },
+                "drone_specification": {
+                    "$ref": "#/definitions/models.DroneSpecification"
+                },
+                "flight_authorization_proposal_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.DroneRegistration": {
+            "type": "object",
+            "properties": {
+                "drone_type": {
+                    "type": "string"
+                },
+                "factory_number": {
+                    "type": "string"
+                },
+                "registration_date": {
+                    "$ref": "#/definitions/models.Date"
+                },
+                "registration_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.DroneSpecification": {
+            "type": "object",
+            "properties": {
+                "dimension": {
+                    "$ref": "#/definitions/models.Dimension"
+                },
+                "engine_type": {
+                    "type": "string"
+                },
+                "maximum_take_off_weight": {
+                    "type": "integer"
+                },
+                "operating_frequency": {
+                    "type": "string"
+                },
+                "operating_method": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.FlightArea": {
+            "type": "object",
+            "properties": {
+                "altitude": {
+                    "type": "string"
+                },
+                "commune": {
+                    "type": "string"
+                },
+                "flight_authorization_proposal_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "place": {
+                    "type": "string"
+                },
+                "polygon": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.FlightAreaCoordinate"
+                    }
+                },
+                "province": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.FlightAreaCoordinate": {
+            "type": "object",
+            "properties": {
+                "flight_area_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.FlightAuthorizationApproval": {
+            "type": "object",
+            "properties": {
+                "authorized_flight_area": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.AuthorizedFlightArea"
+                    }
+                },
+                "authorized_operating_duration": {
+                    "$ref": "#/definitions/models.OperatingDuration"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "flight_authorization_proposal": {
+                    "$ref": "#/definitions/models.FlightAuthorizationProposal"
+                },
+                "flight_authorization_proposal_id": {
+                    "type": "string"
+                },
+                "flight_negotiation_authorities": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "flight_parameter": {
+                    "$ref": "#/definitions/models.FlightParameter"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.FlightAuthorizationProposal": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "drones": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Drone"
+                    }
+                },
+                "file_paths": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "flight_area": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.FlightArea"
+                    }
+                },
+                "flight_purpose": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "operating_duration": {
+                    "$ref": "#/definitions/models.OperatingDuration"
+                },
+                "operator": {
+                    "$ref": "#/definitions/models.Operator"
+                },
+                "pilot": {
+                    "$ref": "#/definitions/models.Pilot"
+                },
+                "status": {
+                    "$ref": "#/definitions/models.FlightAuthorizationProposalStatus"
+                },
+                "take_off_and_landing_area": {
+                    "$ref": "#/definitions/models.TakeOffAndLandingArea"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.FlightAuthorizationProposalStatus": {
+            "type": "string",
+            "enum": [
+                "PENDING",
+                "APPROVED",
+                "NOTIFIED",
+                "ACTIVATED",
+                "COMPLETED"
+            ],
+            "x-enum-varnames": [
+                "ProposalStatusPending",
+                "ProposalStatusApproved",
+                "ProposalStatusNotified",
+                "ProposalStatusActivated",
+                "ProposalStatusCompleted"
+            ]
+        },
+        "models.FlightNotification": {
+            "type": "object",
+            "properties": {
+                "flight_authorization_approval": {
+                    "$ref": "#/definitions/models.FlightAuthorizationApproval"
+                },
+                "flight_authorization_approval_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "intended_flight_area": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.IntendedFlightArea"
+                    }
+                },
+                "intended_operating_duration": {
+                    "$ref": "#/definitions/models.OperatingDuration"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.FlightParameter": {
+            "type": "object",
+            "properties": {
+                "altitude": {
+                    "type": "string"
+                },
+                "flight_authorization_approval_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "radius": {
+                    "type": "string"
+                },
+                "take_off_and_landing_area": {
+                    "$ref": "#/definitions/models.TakeOffAndLandingArea"
+                }
+            }
+        },
+        "models.IntendedFlightArea": {
+            "type": "object",
+            "properties": {
+                "altitude": {
+                    "type": "string"
+                },
+                "commune": {
+                    "type": "string"
+                },
+                "flight_notification_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "place": {
+                    "type": "string"
+                },
+                "polygon": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.IntendedFlightAreaCoordinate"
+                    }
+                },
+                "province": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.IntendedFlightAreaCoordinate": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "intended_flight_area_id": {
+                    "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                }
+            }
+        },
+        "models.OperatingDuration": {
+            "type": "object",
+            "properties": {
+                "duration": {
+                    "description": "So ngay to chuc bay",
+                    "type": "integer"
+                },
+                "from_day": {
+                    "description": "Ngay bat dau (Ngay Thang Nam gio)",
+                    "type": "string"
+                },
+                "to_day": {
+                    "description": "Ngay ket thuc (Ngay Thang Nam gio)",
+                    "type": "string"
+                }
+            }
+        },
+        "models.Operator": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "business_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "fax": {
+                    "type": "string"
+                },
+                "flight_authorization_proposal_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "nationality": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "tax_identification_number": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Pilot": {
+            "type": "object",
+            "properties": {
+                "birthday": {
+                    "$ref": "#/definitions/models.Date"
+                },
+                "flight_authorization_proposal_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "identification_number": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "pilot_license": {
+                    "$ref": "#/definitions/models.PilotLicense"
+                }
+            }
+        },
+        "models.PilotLicense": {
+            "type": "object",
+            "properties": {
+                "license_number": {
+                    "type": "string"
+                },
+                "license_provision_date": {
+                    "$ref": "#/definitions/models.Date"
+                }
+            }
+        },
+        "models.TakeOffAndLandingArea": {
+            "type": "object",
+            "properties": {
+                "commune": {
+                    "type": "string"
+                },
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "place": {
+                    "type": "string"
+                },
+                "province": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 400
+                },
+                "message": {
+                    "type": "string",
+                    "example": "status bad request"
+                }
+            }
+        },
+        "types.SucceedResponse": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "success": {
+                    "type": "boolean"
+                }
+            }
+        }
+    }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

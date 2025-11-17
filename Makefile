@@ -92,6 +92,7 @@ docker:
 		-f Dockerfile . \
 
 docker-push:
+	make swag
 	make docker 
 	docker push harbor.vht.vn/c4i/$(MODULE_NAME):dev
 

@@ -1,3 +1,334 @@
+definitions:
+  models.AuthorizedFlightArea:
+    properties:
+      altitude:
+        type: string
+      commune:
+        type: string
+      flight_authorization_approval_id:
+        type: string
+      id:
+        type: string
+      place:
+        type: string
+      polygon:
+        items:
+          $ref: '#/definitions/models.AuthorizedFlightAreaCoordinate'
+        type: array
+      province:
+        type: string
+    type: object
+  models.AuthorizedFlightAreaCoordinate:
+    properties:
+      authorized_flight_area_id:
+        type: string
+      id:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+    type: object
+  models.Date:
+    properties:
+      time.Time:
+        type: string
+    type: object
+  models.Dimension:
+    properties:
+      height:
+        type: integer
+      length:
+        type: integer
+      width:
+        type: integer
+    type: object
+  models.Drone:
+    properties:
+      drone_registration:
+        $ref: '#/definitions/models.DroneRegistration'
+      drone_specification:
+        $ref: '#/definitions/models.DroneSpecification'
+      flight_authorization_proposal_id:
+        type: string
+      id:
+        type: string
+    type: object
+  models.DroneRegistration:
+    properties:
+      drone_type:
+        type: string
+      factory_number:
+        type: string
+      registration_date:
+        $ref: '#/definitions/models.Date'
+      registration_number:
+        type: string
+    type: object
+  models.DroneSpecification:
+    properties:
+      dimension:
+        $ref: '#/definitions/models.Dimension'
+      engine_type:
+        type: string
+      maximum_take_off_weight:
+        type: integer
+      operating_frequency:
+        type: string
+      operating_method:
+        type: string
+    type: object
+  models.FlightArea:
+    properties:
+      altitude:
+        type: string
+      commune:
+        type: string
+      flight_authorization_proposal_id:
+        type: string
+      id:
+        type: string
+      place:
+        type: string
+      polygon:
+        items:
+          $ref: '#/definitions/models.FlightAreaCoordinate'
+        type: array
+      province:
+        type: string
+    type: object
+  models.FlightAreaCoordinate:
+    properties:
+      flight_area_id:
+        type: string
+      id:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+    type: object
+  models.FlightAuthorizationApproval:
+    properties:
+      authorized_flight_area:
+        items:
+          $ref: '#/definitions/models.AuthorizedFlightArea'
+        type: array
+      authorized_operating_duration:
+        $ref: '#/definitions/models.OperatingDuration'
+      created_at:
+        type: string
+      flight_authorization_proposal:
+        $ref: '#/definitions/models.FlightAuthorizationProposal'
+      flight_authorization_proposal_id:
+        type: string
+      flight_negotiation_authorities:
+        items:
+          type: string
+        type: array
+      flight_parameter:
+        $ref: '#/definitions/models.FlightParameter'
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.FlightAuthorizationProposal:
+    properties:
+      created_at:
+        type: string
+      drones:
+        items:
+          $ref: '#/definitions/models.Drone'
+        type: array
+      file_paths:
+        items:
+          type: string
+        type: array
+      flight_area:
+        items:
+          $ref: '#/definitions/models.FlightArea'
+        type: array
+      flight_purpose:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      operating_duration:
+        $ref: '#/definitions/models.OperatingDuration'
+      operator:
+        $ref: '#/definitions/models.Operator'
+      pilot:
+        $ref: '#/definitions/models.Pilot'
+      status:
+        $ref: '#/definitions/models.FlightAuthorizationProposalStatus'
+      take_off_and_landing_area:
+        $ref: '#/definitions/models.TakeOffAndLandingArea'
+      updated_at:
+        type: string
+    type: object
+  models.FlightAuthorizationProposalStatus:
+    enum:
+    - PENDING
+    - APPROVED
+    - NOTIFIED
+    - ACTIVATED
+    - COMPLETED
+    type: string
+    x-enum-varnames:
+    - ProposalStatusPending
+    - ProposalStatusApproved
+    - ProposalStatusNotified
+    - ProposalStatusActivated
+    - ProposalStatusCompleted
+  models.FlightNotification:
+    properties:
+      flight_authorization_approval:
+        $ref: '#/definitions/models.FlightAuthorizationApproval'
+      flight_authorization_approval_id:
+        type: string
+      id:
+        type: string
+      intended_flight_area:
+        items:
+          $ref: '#/definitions/models.IntendedFlightArea'
+        type: array
+      intended_operating_duration:
+        $ref: '#/definitions/models.OperatingDuration'
+      name:
+        type: string
+    type: object
+  models.FlightParameter:
+    properties:
+      altitude:
+        type: string
+      flight_authorization_approval_id:
+        type: string
+      id:
+        type: string
+      radius:
+        type: string
+      take_off_and_landing_area:
+        $ref: '#/definitions/models.TakeOffAndLandingArea'
+    type: object
+  models.IntendedFlightArea:
+    properties:
+      altitude:
+        type: string
+      commune:
+        type: string
+      flight_notification_id:
+        type: string
+      id:
+        type: string
+      place:
+        type: string
+      polygon:
+        items:
+          $ref: '#/definitions/models.IntendedFlightAreaCoordinate'
+        type: array
+      province:
+        type: string
+    type: object
+  models.IntendedFlightAreaCoordinate:
+    properties:
+      id:
+        type: string
+      intended_flight_area_id:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+    type: object
+  models.OperatingDuration:
+    properties:
+      duration:
+        description: So ngay to chuc bay
+        type: integer
+      from_day:
+        description: Ngay bat dau (Ngay Thang Nam gio)
+        type: string
+      to_day:
+        description: Ngay ket thuc (Ngay Thang Nam gio)
+        type: string
+    type: object
+  models.Operator:
+    properties:
+      address:
+        type: string
+      business_name:
+        type: string
+      email:
+        type: string
+      fax:
+        type: string
+      flight_authorization_proposal_id:
+        type: string
+      id:
+        type: string
+      nationality:
+        type: string
+      phone_number:
+        type: string
+      tax_identification_number:
+        type: string
+    type: object
+  models.Pilot:
+    properties:
+      birthday:
+        $ref: '#/definitions/models.Date'
+      flight_authorization_proposal_id:
+        type: string
+      id:
+        type: string
+      identification_number:
+        type: string
+      name:
+        type: string
+      phone_number:
+        type: string
+      pilot_license:
+        $ref: '#/definitions/models.PilotLicense'
+    type: object
+  models.PilotLicense:
+    properties:
+      license_number:
+        type: string
+      license_provision_date:
+        $ref: '#/definitions/models.Date'
+    type: object
+  models.TakeOffAndLandingArea:
+    properties:
+      commune:
+        type: string
+      latitude:
+        type: number
+      longitude:
+        type: number
+      place:
+        type: string
+      province:
+        type: string
+    type: object
+  types.ErrorResponse:
+    properties:
+      code:
+        example: 400
+        type: integer
+      message:
+        example: status bad request
+        type: string
+    type: object
+  types.SucceedResponse:
+    properties:
+      data: {}
+      success:
+        type: boolean
+    type: object
 host: 127.0.0.1:8080
 info:
   contact:
@@ -11,5 +342,499 @@ info:
   termsOfService: http://swagger.io/terms/
   title: Go Template Project API
   version: "1.0"
-paths: {}
+paths:
+  /flight-authorization-approvals:
+    get:
+      description: List flight authorization approvals filtered by query parameters
+      parameters:
+      - description: Page number (starting from 1)
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      - description: Filter by proposal ID
+        in: query
+        name: flight_authorization_proposal_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: List flight authorization approvals
+      tags:
+      - flight-authorization-approvals
+    post:
+      consumes:
+      - application/json
+      description: Create a new flight authorization approval with associated areas
+        and parameters
+      parameters:
+      - description: Flight authorization approval payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.FlightAuthorizationApproval'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.FlightAuthorizationApproval'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Create flight authorization approval
+      tags:
+      - flight-authorization-approvals
+  /flight-authorization-approvals/{id}:
+    delete:
+      description: Delete a flight authorization approval by ID
+      parameters:
+      - description: Flight authorization approval ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.SucceedResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Delete flight authorization approval
+      tags:
+      - flight-authorization-approvals
+    get:
+      description: Retrieve a flight authorization approval by ID
+      parameters:
+      - description: Flight authorization approval ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.FlightAuthorizationApproval'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get flight authorization approval
+      tags:
+      - flight-authorization-approvals
+    put:
+      consumes:
+      - application/json
+      description: Update a flight authorization approval and its related resources
+      parameters:
+      - description: Flight authorization approval ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Flight authorization approval payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.FlightAuthorizationApproval'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.FlightAuthorizationApproval'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Update flight authorization approval
+      tags:
+      - flight-authorization-approvals
+  /flight-authorization-proposals:
+    get:
+      description: List flight authorization proposals filtered by query parameters
+      parameters:
+      - description: Page number (starting from 1)
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      - description: Filter by flight purpose
+        in: query
+        name: flight_purpose
+        type: string
+      - description: Filter by airport
+        in: query
+        name: airport
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: List flight authorization proposals
+      tags:
+      - flight-authorization-proposals
+    post:
+      consumes:
+      - application/json
+      description: Create a new flight authorization proposal with nested resources
+      parameters:
+      - description: Flight authorization proposal payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.FlightAuthorizationProposal'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.FlightAuthorizationProposal'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Create flight authorization proposal
+      tags:
+      - flight-authorization-proposals
+  /flight-authorization-proposals/{id}:
+    delete:
+      description: Delete a flight authorization proposal by ID
+      parameters:
+      - description: Flight authorization proposal ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.SucceedResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Delete flight authorization proposal
+      tags:
+      - flight-authorization-proposals
+    get:
+      description: Retrieve a flight authorization proposal by ID
+      parameters:
+      - description: Flight authorization proposal ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.FlightAuthorizationProposal'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get flight authorization proposal
+      tags:
+      - flight-authorization-proposals
+    put:
+      consumes:
+      - application/json
+      description: Update a flight authorization proposal and its nested resources
+      parameters:
+      - description: Flight authorization proposal ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Flight authorization proposal payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.FlightAuthorizationProposal'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.FlightAuthorizationProposal'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Update flight authorization proposal
+      tags:
+      - flight-authorization-proposals
+  /flight-notifications:
+    get:
+      description: List flight notifications filtered by query parameters
+      parameters:
+      - description: Page number (starting from 1)
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      - description: Filter by approval ID
+        in: query
+        name: flight_authorization_approval_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: List flight notifications
+      tags:
+      - flight-notifications
+    post:
+      consumes:
+      - application/json
+      description: Create a new flight notification associated with an approval
+      parameters:
+      - description: Flight notification payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.FlightNotification'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.FlightNotification'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Create flight notification
+      tags:
+      - flight-notifications
+  /flight-notifications/{id}:
+    delete:
+      description: Delete a flight notification by ID
+      parameters:
+      - description: Flight notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/types.SucceedResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Delete flight notification
+      tags:
+      - flight-notifications
+    get:
+      description: Retrieve a flight notification by ID
+      parameters:
+      - description: Flight notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.FlightNotification'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Get flight notification
+      tags:
+      - flight-notifications
+    put:
+      consumes:
+      - application/json
+      description: Update a flight notification and its intended flight areas
+      parameters:
+      - description: Flight notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Flight notification payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.FlightNotification'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.FlightNotification'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/types.ErrorResponse'
+      summary: Update flight notification
+      tags:
+      - flight-notifications
 swagger: "2.0"

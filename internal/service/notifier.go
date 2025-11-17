@@ -2,11 +2,7 @@ package service
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"sync"
-
-	"github.com/nats-io/nats.go"
 )
 
 type NotificationEvent string
@@ -23,54 +19,45 @@ type eventMessage struct {
 }
 
 type Notifier struct {
-	conn *nats.Conn
+	mu          sync.RWMutex
+	subscribers map[NotificationEvent]map[*subscriber]struct{}
 }
 
-func NewNotifier(conn *nats.Conn) *Notifier {
+type subscriber struct {
+	ch chan []byte
+}
+
+func NewNotifier() *Notifier {
 	return &Notifier{
-		conn: conn,
+		subscribers: make(map[NotificationEvent]map[*subscriber]struct{}),
 	}
 }
 
-func (n *Notifier) subject(event NotificationEvent) string {
-	return fmt.Sprintf("websocket.%s", event)
-}
-
-func (n *Notifier) Subscribe(event NotificationEvent) (<-chan []byte, func(), error) {
-	noop := func() {}
-	if n == nil || n.conn == nil {
-		return nil, noop, errors.New("notifier connection not initialized")
+func (n *Notifier) Subscribe(event NotificationEvent) (<-chan []byte, func()) {
+	sub := &subscriber{ch: make(chan []byte, 16)}
+	n.mu.Lock()
+	if n.subscribers[event] == nil {
+		n.subscribers[event] = make(map[*subscriber]struct{})
 	}
-	messages := make(chan []byte, 16)
-	stop := make(chan struct{})
-	sub, err := n.conn.Subscribe(n.subject(event), func(msg *nats.Msg) {
-		data := make([]byte, len(msg.Data))
-		copy(data, msg.Data)
-		select {
-		case messages <- data:
-		case <-stop:
+	n.subscribers[event][sub] = struct{}{}
+	n.mu.Unlock()
+	return sub.ch, func() {
+		n.mu.Lock()
+		subs := n.subscribers[event]
+		if subs != nil {
+			if _, ok := subs[sub]; ok {
+				delete(subs, sub)
+				if len(subs) == 0 {
+					delete(n.subscribers, event)
+				}
+			}
 		}
-	})
-	if err != nil {
-		close(messages)
-		close(stop)
-		return nil, noop, err
+		n.mu.Unlock()
+		close(sub.ch)
 	}
-	var once sync.Once
-	unsubscribe := func() {
-		once.Do(func() {
-			close(stop)
-			_ = sub.Unsubscribe()
-			close(messages)
-		})
-	}
-	return messages, unsubscribe, nil
 }
 
 func (n *Notifier) Publish(event NotificationEvent, payload interface{}) error {
-	if n == nil || n.conn == nil {
-		return errors.New("notifier connection not initialized")
-	}
 	msg := eventMessage{
 		Type: string(event),
 		Data: payload,
@@ -79,5 +66,18 @@ func (n *Notifier) Publish(event NotificationEvent, payload interface{}) error {
 	if err != nil {
 		return err
 	}
-	return n.conn.Publish(n.subject(event), data)
+	n.mu.RLock()
+	subs := n.subscribers[event]
+	list := make([]*subscriber, 0, len(subs))
+	for sub := range subs {
+		list = append(list, sub)
+	}
+	n.mu.RUnlock()
+	for _, sub := range list {
+		select {
+		case sub.ch <- data:
+		default:
+		}
+	}
+	return nil
 }

@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"172.21.5.249/airtrans/at-flight-authorization/internal/config"
 	"172.21.5.249/airtrans/at-flight-authorization/internal/gapi"
@@ -96,23 +95,23 @@ func runServer() {
 
 	svc.SubscribeJS(context.Background())
 
-	ticker := time.NewTicker(cfg.PostgresConfig.CleanupInterval)
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer stop()
+	// ticker := time.NewTicker(cfg.PostgresConfig.CleanupInterval)
+	// ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	// defer stop()
 
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				if err := svc.CleanupOldRecords(ctx, cfg.PostgresConfig.Retention); err != nil {
-					log.Error().Msgf("Cleanup error: %v", err)
-				}
-			case <-ctx.Done():
-				ticker.Stop()
-				return
-			}
-		}
-	}()
+	// go func() {
+	// 	for {
+	// 		select {
+	// 		case <-ticker.C:
+	// 			if err := svc.CleanupOldRecords(ctx, cfg.PostgresConfig.Retention); err != nil {
+	// 				log.Error().Msgf("Cleanup error: %v", err)
+	// 			}
+	// 		case <-ctx.Done():
+	// 			ticker.Stop()
+	// 			return
+	// 		}
+	// 	}
+	// }()
 
 	go func() {
 		c := make(chan os.Signal, 1)

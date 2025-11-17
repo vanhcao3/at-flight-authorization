@@ -30,10 +30,7 @@ func handler(s *hapi.Server, event service.NotificationEvent) echo.HandlerFunc {
 			return err
 		}
 		defer conn.Close()
-		messages, unsubscribe, err := s.Service.Notifier().Subscribe(event)
-		if err != nil {
-			return err
-		}
+		messages, unsubscribe := s.Service.Notifier().Subscribe(event)
 		defer unsubscribe()
 		done := make(chan struct{})
 		go func() {

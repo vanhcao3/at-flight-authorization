@@ -85,6 +85,24 @@ func New(s *stream.EmbeddedNats, cfg config.ServiceConfig, db *gorm.DB) *Service
 	// 	&models.FlightNotification{},
 	// )
 
+	db.Migrator().CreateTable( //Authorization Form
+		&models.Operator{},
+		&models.Drone{},
+		&models.FlightArea{},
+		&models.Pilot{},
+		&models.FlightAreaCoordinate{},
+		&models.FlightAuthorizationProposal{},
+		//Authorization Approval
+		&models.FlightParameter{},
+		&models.AuthorizedFlightAreaCoordinate{},
+		&models.AuthorizedFlightArea{},
+		&models.FlightAuthorizationApproval{},
+		//Flight Notification
+		&models.IntendedFlightArea{},
+		&models.IntendedFlightAreaCoordinate{},
+		&models.FlightNotification{},
+	)
+
 	//Migrate DB
 	db.AutoMigrate(
 		//Authorization Form
@@ -92,8 +110,8 @@ func New(s *stream.EmbeddedNats, cfg config.ServiceConfig, db *gorm.DB) *Service
 		&models.Drone{},
 		&models.FlightArea{},
 		&models.Pilot{},
-		&models.FlightAuthorizationProposal{},
 		&models.FlightAreaCoordinate{},
+		&models.FlightAuthorizationProposal{},
 		//Authorization Approval
 		&models.FlightParameter{},
 		&models.AuthorizedFlightAreaCoordinate{},
@@ -110,7 +128,7 @@ func New(s *stream.EmbeddedNats, cfg config.ServiceConfig, db *gorm.DB) *Service
 		cfg:            cfg,
 		db:             db,
 		statusInterval: time.Minute,
-		notifier:       NewNotifier(s.Client),
+		notifier:       NewNotifier(),
 	}
 
 	svc.startProposalStatusWatcher()

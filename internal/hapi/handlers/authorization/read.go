@@ -20,7 +20,7 @@ import (
 //	@Accept			json
 //	@Produce		json
 //	@Param			datasource	body		models.AuthorizationApproval	true	"datasource body"
-//	@Param			eventAPI	query		bool			true	"event api call flag"
+//	@Param			eventAPI	query		bool							true	"event api call flag"
 //	@Success		200			{object}	models.AuthorizationApproval
 //	@Failure		400			{object}	types.ErrorResponse
 //	@Router			/authorization-logs [post]

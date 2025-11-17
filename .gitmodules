@@ -1,8 +1,0 @@
-[submodule "pkg"]
-	path = pkg
-	url = git@192.168.205.151:vq2-go/afad-proto.git
-	branch = master
-[submodule "vendor"]
-	path = vendor
-	url = git@192.168.205.151:vq2-go/vendor.git
-	branch = master

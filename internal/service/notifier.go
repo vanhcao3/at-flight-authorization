@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"strings"
 	"sync"
 )
 
@@ -66,6 +67,7 @@ func (n *Notifier) Publish(event NotificationEvent, payload interface{}) error {
 	if err != nil {
 		return err
 	}
+	data = []byte(strings.ToValidUTF8(string(data), ""))
 	n.mu.RLock()
 	subs := n.subscribers[event]
 	list := make([]*subscriber, 0, len(subs))

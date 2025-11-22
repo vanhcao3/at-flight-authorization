@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"net/http"
+	"strings"
 
 	"172.21.5.249/airtrans/at-flight-authorization/internal/hapi"
 	"172.21.5.249/airtrans/at-flight-authorization/internal/service"
@@ -51,7 +52,8 @@ func handler(s *hapi.Server, event service.NotificationEvent) echo.HandlerFunc {
 				if !ok {
 					return nil
 				}
-				if err := conn.WriteMessage(websocket.TextMessage, msg); err != nil {
+				text := strings.ToValidUTF8(string(msg), "")
+				if err := conn.WriteMessage(websocket.TextMessage, []byte(text)); err != nil {
 					return err
 				}
 			}

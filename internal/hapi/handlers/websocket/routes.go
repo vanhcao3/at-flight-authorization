@@ -20,6 +20,7 @@ func RegisterRoutes(s *hapi.Server) []*echo.Route {
 		s.Router.Root.GET("/ws/flight-authorization-proposals", handler(s, service.EventFlightAuthorizationProposalCreated)),
 		s.Router.Root.GET("/ws/flight-authorization-approvals", handler(s, service.EventFlightAuthorizationApprovalCreated)),
 		s.Router.Root.GET("/ws/flight-notifications", handler(s, service.EventFlightNotificationCreated)),
+		s.Router.Root.GET("/ws/flight-notifications/overlaps", handler(s, service.EventFlightNotificationOverlapped)),
 	}
 }
 

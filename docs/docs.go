@@ -1072,9 +1072,23 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+				},
+				"status": {
+					"$ref": "#/definitions/models.FlightNotificationStatus"
                 }
             }
         },
+		"models.FlightNotificationStatus": {
+			"type": "string",
+			"enum": [
+				"PENDING",
+				"ACTIVATED"
+			],
+			"x-enum-varnames": [
+				"FlightNotificationStatusPending",
+				"FlightNotificationStatusActivated"
+			]
+		},
         "models.FlightParameter": {
             "type": "object",
             "properties": {

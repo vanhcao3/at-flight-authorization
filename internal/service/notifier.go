@@ -11,6 +11,7 @@ const (
 	EventFlightAuthorizationProposalCreated NotificationEvent = "flight_authorization_proposal.created"
 	EventFlightAuthorizationApprovalCreated NotificationEvent = "flight_authorization_approval.created"
 	EventFlightNotificationCreated          NotificationEvent = "flight_notification.created"
+	EventFlightNotificationOverlapped       NotificationEvent = "flight_notification.overlapped"
 )
 
 type eventMessage struct {
